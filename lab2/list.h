@@ -4,6 +4,7 @@
 
 #ifndef OOP2_LIST_H
 #define OOP2_LIST_H
+#include "memory"
 
 template <class T>
 class List
@@ -13,7 +14,7 @@ public:
     List();
 
     // конструктор копирования
-   // List(const List<T>& lst);
+    List(const List<T>& lst);
 
     // деструктор
     ~List();
@@ -79,16 +80,33 @@ private:
     struct Node
     {
         T data;
-        Node *next;
+        std::shared_ptr<Node> next;
         explicit Node(const T& elem);
-
-        explicit Node(const T& elem, const Node *next_ptr);
 
         ~Node()= default;
     };
 
-    Node *head;
-    Node *tail;
+    std::shared_ptr<Node> head;
+    std::shared_ptr<Node> tail;
+
+    std::shared_ptr<Node> find_elem_ptr(const size_t index)
+    {
+        if (index >= length or index < 0)
+        {
+            std::cout << "Wrong index!" << std::endl;
+            throw 0;
+        }
+
+        size_t count = 0;
+        std::shared_ptr<Node> cur_ptr = head;
+        while (count != index)
+        {
+            cur_ptr = cur_ptr->next;
+            count++;
+        }
+
+        return cur_ptr;
+    }
 
 };
 
@@ -98,6 +116,18 @@ List<T>::List()
     length = 0;
     head = nullptr;
     tail = nullptr;
+}
+
+template<class T>
+List<T>::List(const List<T>& lst)
+{
+    std::shared_ptr<Node> cur_ptr = lst.head;
+    while(cur_ptr != nullptr)
+    {
+        push_back(cur_ptr->data);
+        cur_ptr = cur_ptr->next;
+    }
+    length = lst.length;
 }
 
 template<class T>
@@ -111,14 +141,6 @@ List<T>::Node:: Node(const T& elem)
 {
     data = elem;
     next = nullptr;
-}
-
-template<class T>
-List<T>::Node::Node(const T& elem, const Node *next_ptr)
-{
-    data = elem;
-    next = new Node*;
-    next = next_ptr;
 }
 
 template<class T>
@@ -136,13 +158,12 @@ bool List<T>::is_empty() const
 template<class T>
 void List<T>::push_back(const T &elem)
 {
-    Node *cur_node = new Node(elem);
+   std::shared_ptr<Node> cur_node = std::make_shared<Node>(elem);
     if (tail == nullptr)
     {
         tail = cur_node;
         head = cur_node;
     }
-
     else
     {
         tail->next = cur_node;
@@ -154,7 +175,7 @@ void List<T>::push_back(const T &elem)
 template<class T>
 void List<T>:: push_front(const T &elem)
 {
-    Node *cur_node = new Node(elem);
+    std::shared_ptr<Node> cur_node = std::make_shared<Node>(elem);
     if (head == nullptr)
     {
         head = cur_node;
@@ -176,15 +197,15 @@ T List<T>::pop_back()
         std::cout << "List is empty" << std::endl;
         throw 0;
     }
-    Node *ptr = head;
-    Node *prev_ptr = head;
+    std::shared_ptr<Node> ptr = head;
+    std::shared_ptr<Node> prev_ptr = head;
     while (ptr != tail)
     {
         prev_ptr = ptr;
         ptr = ptr->next;
     }
     T data = ptr->data;
-    delete ptr;
+    ptr.reset();
     tail = prev_ptr;
     tail->next = nullptr;
     --length;
@@ -203,9 +224,9 @@ T List<T>::pop_front()
         std::cout << "List is empty" << std::endl;
         throw 0;
     }
-    Node *cur_ptr = head->next;
+    std::shared_ptr<Node> cur_ptr = head->next;
     T data = head->data;
-    delete head;
+    head.reset();
     head = cur_ptr;
     length--;
     if (length == 0)
@@ -218,44 +239,32 @@ T List<T>::pop_front()
 template<class T>
 void List<T>::push_range_back(const List<T> &lst)
 {
-    if (head == nullptr)
+    std::shared_ptr<Node> cur_ptr = lst.head;
+
+    while (cur_ptr != nullptr)
     {
-        head = lst.head;
-        tail = lst.tail;
+        push_back(cur_ptr->data);
+        cur_ptr = cur_ptr->next;
     }
-    else
-    {
-        tail->next = lst.head;
-        if (lst.head != nullptr)
-            tail = lst.tail;
-    }
-    length += lst.length;
 }
-// todo: сделать так чтоб push_range_front(const List<T> &lst) не изменяла вставляемый список
+
 template<class T>
 void List<T>::push_range_front(const List<T> &lst)
 {
-    if (head == nullptr)
+    List<T> ListCopy(lst);
+    ListCopy.reverse();
+    std::shared_ptr<Node> cur_ptr = ListCopy.head;
+    while(cur_ptr != nullptr)
     {
-        head = lst.head;
-        tail = lst.tail;
+        push_front(cur_ptr->data);
+        cur_ptr = cur_ptr->next;
     }
-    else
-    {
-        if (lst.tail != nullptr)
-        {
-            Node *copy = lst.tail;
-            copy->next = head;
-            head = lst.head;
-        }
-    }
-    length += lst.length;
 }
 
 template<class T>
 void List<T>::push_range_back(T *const arr, const size_t size)
 {
-    for (int i = 0; i < size; i++)
+    for (size_t i = 0; i < size; i++)
     {
         push_back(arr[i]);
     }
@@ -264,7 +273,7 @@ void List<T>::push_range_back(T *const arr, const size_t size)
 template<class T>
 void List<T>::push_range_front(T *const arr, const size_t size)
 {
-    for (int i = 0; i < size; i++)
+    for (size_t i = size - 1; i >= 0; i--)
     {
         push_front(arr[i]);
     }
@@ -273,40 +282,14 @@ void List<T>::push_range_front(T *const arr, const size_t size)
 template<class T>
 void List<T>::set_elem(const size_t index, const T &elem)
 {
-    if (index >= length or index < 0)
-    {
-        std::cout << "Wrong index!" << std::endl;
-        throw 0;
-    }
-
-    size_t count = 0;
-    Node *cur_ptr = head;
-    while (count != index)
-    {
-        cur_ptr = cur_ptr->next;
-        count++;
-    }
-
+    std::shared_ptr<Node> cur_ptr = find_elem_ptr(index);
     cur_ptr->data = elem;
 }
 
 template<class T>
 T& List<T>::get_elem(const size_t index) const 
 {
-    if (index >= length or index < 0)
-    {
-        std::cout << "Wrong index!" << std::endl;
-        throw 0;
-    }
-
-    size_t count = 0;
-    Node *cur_ptr = head;
-    while (count != index)
-    {
-        cur_ptr = cur_ptr->next;
-        count++;
-    }
-// todo копипаста
+    std::shared_ptr<Node> cur_ptr = find_elem_ptr(index);
     return cur_ptr->data;
 }
 
@@ -321,34 +304,45 @@ void List<T>::remove_elem(const size_t index)
 
     if (index == 0)
     {
-        Node *elem = head;
-        head = head->next;
-        delete elem;
+        pop_front();
+    }
+    else if (index == length - 1)
+    {
+        pop_back();
     }
     else
     {
         size_t count = 0;
-        Node *cur_ptr = head;
+        std::shared_ptr<Node> cur_ptr = head;
         while (count + 1 != index) {
             cur_ptr = cur_ptr->next;
             count++;
         }
-        Node *elem = cur_ptr->next;
+        std::shared_ptr<Node> elem = cur_ptr->next;
 
         cur_ptr->next = elem->next;
-        delete elem;
+        elem.reset();
+        length--;
     }
-    length--;
 }
 
 template<class T>
 List<T>& List<T>::combine(const List<T> &lst)
 {
     List<T> *result_list = new List<T>;
-    result_list->head = head;
-    result_list->tail = tail;
-    result_list->tail->next = lst.head;
-    result_list->tail = lst.tail;
+    std::shared_ptr<Node> cur_ptr = head;
+    while(cur_ptr != nullptr)
+    {
+        result_list->push_back(cur_ptr->data);
+        cur_ptr = cur_ptr->next;
+    }
+
+    cur_ptr = lst.head;
+    while(cur_ptr != nullptr)
+    {
+        result_list->push_back(cur_ptr->data);
+        cur_ptr = cur_ptr->next;
+    }
     result_list->length = length + lst.length;
 
     return *result_list;
@@ -358,7 +352,7 @@ template<class T>
 T* List<T>::to_array()
 {
     T *array = new T[length];
-    Node *ptr = head;
+    std::shared_ptr<Node> ptr = head;
     size_t i = 0;
     while (ptr != nullptr)
     {
@@ -371,19 +365,18 @@ T* List<T>::to_array()
 template<class T>
 void List<T>::sort(bool is_increase)
 {
-    Node *a = nullptr;
-    Node *b = nullptr;
-    Node *p = nullptr;
-    Node *h = nullptr;
-    bool condition;
+    std::shared_ptr<Node> a;
+    std::shared_ptr<Node> b;
+    std::shared_ptr<Node> p;
+    std::shared_ptr<Node> h = nullptr;
 
-    for(Node *i = head; i != NULL; )
+    for(std::shared_ptr<Node>i = head; i != nullptr; )
     {
         a = i;
         i = i->next;
         b = h;
 
-        for (p = NULL; (b != nullptr) && (a->data > b->data == is_increase); )
+        for (p = nullptr; (b != nullptr) && (a->data > b->data == is_increase); )
         {
             p = b;
             b = b->next;
@@ -412,11 +405,11 @@ void List<T>::sort(bool is_increase)
 template<class T>
 void List<T>::reverse()
 {
-    Node* new_head = nullptr;
+    std::shared_ptr<Node> new_head = nullptr;
     //читаем элементы старого списка
-    for(Node *pos = head; pos;)
+    for(std::shared_ptr<Node> pos = head; pos;)
     {
-        Node *save_next = pos->next;
+        std::shared_ptr<Node> save_next = pos->next;
         pos->next = new_head;
         new_head = pos;
         pos = save_next;
@@ -430,7 +423,7 @@ template<class T>
 int List<T>::get_index(const T elem)
 {
     size_t count = 0;
-    Node *ptr = head;
+    std::shared_ptr<Node> ptr = head;
     while (ptr != nullptr)
     {
         if (ptr->data == elem)
@@ -446,10 +439,10 @@ int List<T>::get_index(const T elem)
 template<class T>
 void List<T>::clear()
 {
-    Node *temp_ptr = head;
+    std::shared_ptr<Node> temp_ptr = head;
     while (head != nullptr)
     {
-        delete head;
+        head.reset();
         temp_ptr = temp_ptr->next;
         head = temp_ptr;
     }
