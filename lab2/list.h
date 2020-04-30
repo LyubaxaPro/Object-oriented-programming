@@ -12,13 +12,16 @@ public:
     // конструктор по умолчанию
     List();
 
+    // конструктор копирования
+   // List(const List<T>& lst);
+
     // деструктор
     ~List();
     // получить текущий размер списка
-    size_t get_length();
+    size_t get_length() const ;
 
     // Проверить на пустоту
-    bool is_empty();
+    bool is_empty() const ;
 
     // добавить элемент в конец списка
     void push_back(const T& elem);
@@ -48,7 +51,7 @@ public:
     void set_elem(const size_t index,const T& elem);
 
     // получить элемент списка по индексу
-    T& get_elem(const size_t index);
+    T& get_elem(const size_t index) const;
 
     // удалить элемент списка по индексу
     void remove_elem(const size_t index);
@@ -56,33 +59,30 @@ public:
     // объединение списка с другим списком (метод возвращает новый список, содержащий сначала элементы текущего списка, затем, переданного в Combine)
     List<T>& combine(const List<T>& lst);
 
-    // отсортировать
-    void sort(bool increase);
+    // сортировк вставками
+    void sort(bool is_increase);
+
+    // развернуть список
+    void reverse();
 
     // создать новый массив, в который записать все элементы списка. Метод возвращает массив.
     T* to_array();
 
-    // создать новый список из элементов массива
-    List<T>& to_list(T *const arr, const size_t size);
+    // если содержится в списке элемент T, возвращает индекс элемента или -1 в случае если элемент не найден.
+    int get_index(const T elem);
+
+    //  очистить список
+    void clear();
 
 private:
     int length;
     struct Node
     {
         T data;
-        Node *ptr;
-        explicit Node(const T& elem)
-        {
-            data = elem;
-            ptr = nullptr;
-        }
+        Node *next;
+        explicit Node(const T& elem);
 
-        explicit Node(const T& elem, const Node *next_ptr)
-        {
-            data = elem;
-            ptr = new Node*;
-            ptr = next_ptr;
-        }
+        explicit Node(const T& elem, const Node *next_ptr);
 
         ~Node()= default;
     };
@@ -103,23 +103,32 @@ List<T>::List()
 template<class T>
 List<T>::~List()
 {
-    Node *temp_ptr = head;
-    while (head != nullptr)
-    {
-        delete head;
-        temp_ptr = temp_ptr->ptr;
-        head = temp_ptr;
-    }
+    clear();
 }
 
 template<class T>
-size_t List<T>::get_length()
+List<T>::Node:: Node(const T& elem)
+{
+    data = elem;
+    next = nullptr;
+}
+
+template<class T>
+List<T>::Node::Node(const T& elem, const Node *next_ptr)
+{
+    data = elem;
+    next = new Node*;
+    next = next_ptr;
+}
+
+template<class T>
+size_t List<T>::get_length() const
 {
     return length;
 }
 
 template<class T>
-bool List<T>::is_empty()
+bool List<T>::is_empty() const
 {
     return length == 0;
 }
@@ -136,8 +145,8 @@ void List<T>::push_back(const T &elem)
 
     else
     {
-        tail->ptr = cur_node;
-        tail = tail->ptr;
+        tail->next = cur_node;
+        tail = tail->next;
     }
     length++;
 }
@@ -153,7 +162,7 @@ void List<T>:: push_front(const T &elem)
     }
     else
     {
-        cur_node->ptr = head;
+        cur_node->next = head;
         head = cur_node;
     }
     length++;
@@ -164,7 +173,7 @@ T List<T>::pop_back()
 {
     if (length == 0)
     {
-        std::cout << "List is empty" << std::taill;
+        std::cout << "List is empty" << std::endl;
         throw 0;
     }
     Node *ptr = head;
@@ -172,13 +181,13 @@ T List<T>::pop_back()
     while (ptr != tail)
     {
         prev_ptr = ptr;
-        ptr = ptr->ptr;
+        ptr = ptr->next;
     }
     T data = ptr->data;
     delete ptr;
     tail = prev_ptr;
-    tail->ptr = nullptr;
-    length --;
+    tail->next = nullptr;
+    --length;
     if (length == 0)
     {
         head = tail = nullptr;
@@ -191,10 +200,10 @@ T List<T>::pop_front()
 {
     if (length == 0)
     {
-        std::cout << "List is empty" << std::taill;
+        std::cout << "List is empty" << std::endl;
         throw 0;
     }
-    Node *cur_ptr = head->ptr;
+    Node *cur_ptr = head->next;
     T data = head->data;
     delete head;
     head = cur_ptr;
@@ -216,7 +225,7 @@ void List<T>::push_range_back(const List<T> &lst)
     }
     else
     {
-        tail->ptr = lst.head;
+        tail->next = lst.head;
         if (lst.head != nullptr)
             tail = lst.tail;
     }
@@ -236,7 +245,7 @@ void List<T>::push_range_front(const List<T> &lst)
         if (lst.tail != nullptr)
         {
             Node *copy = lst.tail;
-            copy->ptr = head;
+            copy->next = head;
             head = lst.head;
         }
     }
@@ -266,7 +275,7 @@ void List<T>::set_elem(const size_t index, const T &elem)
 {
     if (index >= length or index < 0)
     {
-        std::cout << "Wrong index!" << std::taill;
+        std::cout << "Wrong index!" << std::endl;
         throw 0;
     }
 
@@ -274,7 +283,7 @@ void List<T>::set_elem(const size_t index, const T &elem)
     Node *cur_ptr = head;
     while (count != index)
     {
-        cur_ptr = cur_ptr->ptr;
+        cur_ptr = cur_ptr->next;
         count++;
     }
 
@@ -282,11 +291,11 @@ void List<T>::set_elem(const size_t index, const T &elem)
 }
 
 template<class T>
-T& List<T>::get_elem(const size_t index)
+T& List<T>::get_elem(const size_t index) const 
 {
     if (index >= length or index < 0)
     {
-        std::cout << "Wrong index!" << std::taill;
+        std::cout << "Wrong index!" << std::endl;
         throw 0;
     }
 
@@ -294,10 +303,10 @@ T& List<T>::get_elem(const size_t index)
     Node *cur_ptr = head;
     while (count != index)
     {
-        cur_ptr = cur_ptr->ptr;
+        cur_ptr = cur_ptr->next;
         count++;
     }
-
+// todo копипаста
     return cur_ptr->data;
 }
 
@@ -306,14 +315,14 @@ void List<T>::remove_elem(const size_t index)
 {
     if (index >= length or index < 0)
     {
-        std::cout << "Wrong index!" << std::taill;
+        std::cout << "Wrong index!" << std::endl;
         throw 0;
     }
 
     if (index == 0)
     {
         Node *elem = head;
-        head = head->ptr;
+        head = head->next;
         delete elem;
     }
     else
@@ -321,12 +330,12 @@ void List<T>::remove_elem(const size_t index)
         size_t count = 0;
         Node *cur_ptr = head;
         while (count + 1 != index) {
-            cur_ptr = cur_ptr->ptr;
+            cur_ptr = cur_ptr->next;
             count++;
         }
-        Node *elem = cur_ptr->ptr;
+        Node *elem = cur_ptr->next;
 
-        cur_ptr->ptr = elem->ptr;
+        cur_ptr->next = elem->next;
         delete elem;
     }
     length--;
@@ -338,7 +347,7 @@ List<T>& List<T>::combine(const List<T> &lst)
     List<T> *result_list = new List<T>;
     result_list->head = head;
     result_list->tail = tail;
-    result_list->tail->ptr = lst.head;
+    result_list->tail->next = lst.head;
     result_list->tail = lst.tail;
     result_list->length = length + lst.length;
 
@@ -353,56 +362,99 @@ T* List<T>::to_array()
     size_t i = 0;
     while (ptr != nullptr)
     {
-      array[i] = ptr->data;
-      ptr = ptr->ptr;
-      i++;
+        array[i++] = ptr->data;
+        ptr = ptr->next;
     }
     return array;
 }
 
-
-//функция для сортировки по возрастанию
-template <class T>
-int comp_inc (const void * a, const void * b)
+template<class T>
+void List<T>::sort(bool is_increase)
 {
-  return ( *(T*)a - *(T*)b );
-}
+    Node *a = nullptr;
+    Node *b = nullptr;
+    Node *p = nullptr;
+    Node *h = nullptr;
+    bool condition;
 
-//функция для сортировки по убыванию
-template <class T>
-int comp_dec (const void * a, const void * b)
-{
-  return ( *(T*)b - *(T*)a );
-}
-
-template <class T>
-void List<T>::sort(bool increase)
-{
-    T* arr = this->to_array();
-    if(increase)
-        qsort(arr, length, sizeof(T), comp_inc<T>);
-    else
-        qsort(arr, length, sizeof(T), comp_dec<T>);
-
-    List<T> = to_list(arr, length);
-    delete [] arr;
-
-
-}
-
-template <class T>
-List<T>& List<T>::to_list(T *const arr, const size_t size)
-{
-    List<T> *result_list = new List<T>;
-    *result_list->length = size;
-    for (size_t i = 0; i < size; i++)
+    for(Node *i = head; i != NULL; )
     {
-        *result_list->push_back(arr[i]);
+        a = i;
+        i = i->next;
+        b = h;
+
+        for (p = NULL; (b != nullptr) && (a->data > b->data == is_increase); )
+        {
+            p = b;
+            b = b->next;
+        }
+
+        if(p == nullptr)
+        {
+            a->next = h;
+            h = a;
+        }
+        else
+        {
+            a->next = b;
+            p->next = a;
+        }
     }
-
-    return *result_list;
-
+    if(h != nullptr)
+        head = h;
+    while (h->next != nullptr)
+    {
+        h = h->next;
+    }
+    tail = h;
 }
 
+template<class T>
+void List<T>::reverse()
+{
+    Node* new_head = nullptr;
+    //читаем элементы старого списка
+    for(Node *pos = head; pos;)
+    {
+        Node *save_next = pos->next;
+        pos->next = new_head;
+        new_head = pos;
+        pos = save_next;
+    }
+    tail = head;
+    tail->next = nullptr;
+    head = new_head;
+}
 
-#tailif //OOP2_LIST_H
+template<class T>
+int List<T>::get_index(const T elem)
+{
+    size_t count = 0;
+    Node *ptr = head;
+    while (ptr != nullptr)
+    {
+        if (ptr->data == elem)
+        {
+            return count;
+        }
+        ptr = ptr->next;
+        count++;
+    }
+    return -1;
+}
+
+template<class T>
+void List<T>::clear()
+{
+    Node *temp_ptr = head;
+    while (head != nullptr)
+    {
+        delete head;
+        temp_ptr = temp_ptr->next;
+        head = temp_ptr;
+    }
+    tail = nullptr;
+    length = 0;
+}
+
+#endif //OOP2_LIST_H
