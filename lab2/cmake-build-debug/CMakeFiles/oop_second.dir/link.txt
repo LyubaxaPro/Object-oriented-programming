@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/oop_second.dir/list.cpp.o CMakeFiles/oop_second.dir/main.cpp.o  -o oop_second 
