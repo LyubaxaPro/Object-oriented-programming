@@ -1,7 +1,12 @@
 #include <iostream>
+
 #include "list.h"
+#include "list.cpp" // todo fuck this shit
+
+
 int main()
 {
+
     List<int> List1;
     List1.push_front(1);
     List1.push_front(1);
@@ -15,10 +20,15 @@ int main()
 
     List<int> List2;
 
-    List2.push_back(4);
     List2.push_back(3);
+    List2.push_back(4);
     List2.push_back(5);
-    List2.remove_elem(1);
+    List2 += List1;
+
+    for (auto it: List2) {
+        std::cout << it << std::endl;
+    }
+    std::cout << List2;
    // List1.push_range_front(List2);
 //    int a[6] = {0,1,2,3,4,5};
 //    List1.push_range_back(a, 6);
@@ -29,5 +39,6 @@ int main()
 //    int a = List3.get_index(2);
 //    std::cout << a << std::endl;
    // List3.clear();
+
     return 0;
 }

@@ -4,11 +4,15 @@
 
 #ifndef OOP2_LIST_H
 #define OOP2_LIST_H
-#include "memory"
 
-template <class T>
-class List
-{
+#include <memory>
+#include <iostream>
+#include <iterator>
+
+#include "list_base.h"
+
+template <typename T>
+class List: ListBase{
 public:
     // конструктор по умолчанию
     List();
@@ -16,13 +20,22 @@ public:
     // конструктор копирования
     List(const List<T>& lst);
 
+    // список из массива
+    List(T *arr, size_t size);
+
+    explicit List(const std::initializer_list<T>& lst);
+
     // деструктор
     ~List();
+
     // получить текущий размер списка
-    size_t get_length() const ;
+    size_t get_length() const override;
 
     // Проверить на пустоту
-    bool is_empty() const ;
+    bool is_empty() const override;
+
+    //  очистить список
+    void clear() override;
 
     // добавить элемент в конец списка
     void push_back(const T& elem);
@@ -43,11 +56,11 @@ public:
     void push_range_front(const List<T>& lst);
 
     //добавить массив элементов в конец списка
-    void push_range_back(T *const arr, const size_t size);
+    void push_range_back(T *const arr, const size_t& size);
 
     //добавить массив элементов в начало списка
     void push_range_front(T *const arr, const size_t size);
-
+// todo разобраться с const const&
     // изменить элемент списка по индексу
     void set_elem(const size_t index,const T& elem);
 
@@ -72,11 +85,110 @@ public:
     // если содержится в списке элемент T, возвращает индекс элемента или -1 в случае если элемент не найден.
     int get_index(const T elem);
 
-    //  очистить список
-    void clear();
 
-private:
-    int length;
+    // перегрузка оператора присваивания
+    List<T>& operator =(const List<T>& lst);
+
+    // перегрузка оператора +, работает аналогично Combine.
+    friend List<T> operator +(const List<T>& l1, const List<T>& l2) {
+        List<T> result_list; // todo new?
+        auto cur_ptr = l1.head;
+        while (cur_ptr != nullptr) {
+            result_list->push_back(cur_ptr->data);
+            cur_ptr = cur_ptr->next;
+        }
+
+        cur_ptr = l2.head;
+        while (cur_ptr != nullptr) {
+            result_list->push_back(cur_ptr->data);
+            cur_ptr = cur_ptr->next;
+        }
+
+        return *result_list;
+    }
+
+
+
+        // перегрузка оператора +
+    List<T>& operator +(const T data) //todo T&
+    {
+        push_back(data);
+        return *this;
+    }
+
+    List<T>& operator +(const List<T>& lst)
+    {
+        std::shared_ptr<Node> cur_ptr = lst.head;
+
+        while (cur_ptr != nullptr)
+        {
+            push_back(cur_ptr->data);
+            cur_ptr = cur_ptr->next;
+        }
+        return *this;
+    }
+
+    // перегрузка оператора +=, работает аналогично Combine, значение записывается в this.
+    List<T>& operator +=(const List<T>& lst)
+    {
+        std::shared_ptr<Node> cur_ptr = lst.head;
+
+        while (cur_ptr != nullptr)
+        {
+            push_back(cur_ptr->data);
+            cur_ptr = cur_ptr->next;
+        }
+        return *this;
+    }
+
+    List<T>& operator +=(const T data)
+    {
+        push_back(data);
+        return *this;
+    }
+
+    bool operator ==(const List<T>& lst) const
+    {
+        if (length != lst.length) return false;
+
+        std::shared_ptr<Node> cur_ptr = head;
+        std::shared_ptr<Node> lst_cur_ptr = lst.head;
+        while(cur_ptr != nullptr && lst_cur_ptr != nullptr)
+        {
+            if (cur_ptr->data != lst_cur_ptr->data) return false;
+        }
+        return true;
+    }
+
+    bool operator != (const List<T>& lst) const
+    {
+        if (length != lst.length) return true;
+
+        std::shared_ptr<Node> cur_ptr = head;
+        std::shared_ptr<Node> lst_cur_ptr = lst.head;
+        while(cur_ptr != nullptr && lst_cur_ptr != nullptr)
+        {
+            if (cur_ptr->data != lst_cur_ptr->data) return true;
+        }
+        return false;
+    }
+
+    template<typename _T>
+    friend std::ostream& operator <<(std::ostream& os, const List<_T>& lst)
+    {
+        os << "List ";
+        std::shared_ptr<Node> cur_ptr = lst.head;
+        while(cur_ptr != nullptr)
+        {
+            os << cur_ptr->data << "->";  // todo cur_ptr -> curr_ptr
+            cur_ptr = cur_ptr->next;
+        }
+        os << "nullptr";
+        return os;
+    }
+
+protected:
+    size_t length;
     struct Node
     {
         T data;
@@ -86,6 +198,22 @@ private:
         ~Node()= default;
     };
 
+private:
+    template <typename Ptr, typename Ref, typename ListPtr>
+    class Iterator;
+
+public:
+    typedef Iterator<T*, T&, List<T>*> iterator;
+
+    const iterator begin() {
+        return iterator(this, true);
+    }
+    const iterator end() {
+        return iterator(this, false);
+    }
+
+
+private:
     std::shared_ptr<Node> head;
     std::shared_ptr<Node> tail;
 
@@ -109,345 +237,5 @@ private:
     }
 
 };
-
-template<class T>
-List<T>::List()
-{
-    length = 0;
-    head = nullptr;
-    tail = nullptr;
-}
-
-template<class T>
-List<T>::List(const List<T>& lst)
-{
-    std::shared_ptr<Node> cur_ptr = lst.head;
-    while(cur_ptr != nullptr)
-    {
-        push_back(cur_ptr->data);
-        cur_ptr = cur_ptr->next;
-    }
-    length = lst.length;
-}
-
-template<class T>
-List<T>::~List()
-{
-    clear();
-}
-
-template<class T>
-List<T>::Node:: Node(const T& elem)
-{
-    data = elem;
-    next = nullptr;
-}
-
-template<class T>
-size_t List<T>::get_length() const
-{
-    return length;
-}
-
-template<class T>
-bool List<T>::is_empty() const
-{
-    return length == 0;
-}
-
-template<class T>
-void List<T>::push_back(const T &elem)
-{
-   std::shared_ptr<Node> cur_node = std::make_shared<Node>(elem);
-    if (tail == nullptr)
-    {
-        tail = cur_node;
-        head = cur_node;
-    }
-    else
-    {
-        tail->next = cur_node;
-        tail = tail->next;
-    }
-    length++;
-}
-
-template<class T>
-void List<T>:: push_front(const T &elem)
-{
-    std::shared_ptr<Node> cur_node = std::make_shared<Node>(elem);
-    if (head == nullptr)
-    {
-        head = cur_node;
-        tail = cur_node;
-    }
-    else
-    {
-        cur_node->next = head;
-        head = cur_node;
-    }
-    length++;
-}
-
-template<class T>
-T List<T>::pop_back()
-{
-    if (length == 0)
-    {
-        std::cout << "List is empty" << std::endl;
-        throw 0;
-    }
-    std::shared_ptr<Node> ptr = head;
-    std::shared_ptr<Node> prev_ptr = head;
-    while (ptr != tail)
-    {
-        prev_ptr = ptr;
-        ptr = ptr->next;
-    }
-    T data = ptr->data;
-    ptr.reset();
-    tail = prev_ptr;
-    tail->next = nullptr;
-    --length;
-    if (length == 0)
-    {
-        head = tail = nullptr;
-    }
-    return data;
-}
-
-template<class T>
-T List<T>::pop_front()
-{
-    if (length == 0)
-    {
-        std::cout << "List is empty" << std::endl;
-        throw 0;
-    }
-    std::shared_ptr<Node> cur_ptr = head->next;
-    T data = head->data;
-    head.reset();
-    head = cur_ptr;
-    length--;
-    if (length == 0)
-    {
-        head = tail = nullptr;
-    }
-    return data;
-}
-
-template<class T>
-void List<T>::push_range_back(const List<T> &lst)
-{
-    std::shared_ptr<Node> cur_ptr = lst.head;
-
-    while (cur_ptr != nullptr)
-    {
-        push_back(cur_ptr->data);
-        cur_ptr = cur_ptr->next;
-    }
-}
-
-template<class T>
-void List<T>::push_range_front(const List<T> &lst)
-{
-    List<T> ListCopy(lst);
-    ListCopy.reverse();
-    std::shared_ptr<Node> cur_ptr = ListCopy.head;
-    while(cur_ptr != nullptr)
-    {
-        push_front(cur_ptr->data);
-        cur_ptr = cur_ptr->next;
-    }
-}
-
-template<class T>
-void List<T>::push_range_back(T *const arr, const size_t size)
-{
-    for (size_t i = 0; i < size; i++)
-    {
-        push_back(arr[i]);
-    }
-}
-
-template<class T>
-void List<T>::push_range_front(T *const arr, const size_t size)
-{
-    for (size_t i = size - 1; i >= 0; i--)
-    {
-        push_front(arr[i]);
-    }
-}
-
-template<class T>
-void List<T>::set_elem(const size_t index, const T &elem)
-{
-    std::shared_ptr<Node> cur_ptr = find_elem_ptr(index);
-    cur_ptr->data = elem;
-}
-
-template<class T>
-T& List<T>::get_elem(const size_t index) const 
-{
-    std::shared_ptr<Node> cur_ptr = find_elem_ptr(index);
-    return cur_ptr->data;
-}
-
-template<class T>
-void List<T>::remove_elem(const size_t index)
-{
-    if (index >= length or index < 0)
-    {
-        std::cout << "Wrong index!" << std::endl;
-        throw 0;
-    }
-
-    if (index == 0)
-    {
-        pop_front();
-    }
-    else if (index == length - 1)
-    {
-        pop_back();
-    }
-    else
-    {
-        size_t count = 0;
-        std::shared_ptr<Node> cur_ptr = head;
-        while (count + 1 != index) {
-            cur_ptr = cur_ptr->next;
-            count++;
-        }
-        std::shared_ptr<Node> elem = cur_ptr->next;
-
-        cur_ptr->next = elem->next;
-        elem.reset();
-        length--;
-    }
-}
-
-template<class T>
-List<T>& List<T>::combine(const List<T> &lst)
-{
-    List<T> *result_list = new List<T>;
-    std::shared_ptr<Node> cur_ptr = head;
-    while(cur_ptr != nullptr)
-    {
-        result_list->push_back(cur_ptr->data);
-        cur_ptr = cur_ptr->next;
-    }
-
-    cur_ptr = lst.head;
-    while(cur_ptr != nullptr)
-    {
-        result_list->push_back(cur_ptr->data);
-        cur_ptr = cur_ptr->next;
-    }
-    result_list->length = length + lst.length;
-
-    return *result_list;
-}
-
-template<class T>
-T* List<T>::to_array()
-{
-    T *array = new T[length];
-    std::shared_ptr<Node> ptr = head;
-    size_t i = 0;
-    while (ptr != nullptr)
-    {
-        array[i++] = ptr->data;
-        ptr = ptr->next;
-    }
-    return array;
-}
-
-template<class T>
-void List<T>::sort(bool is_increase)
-{
-    std::shared_ptr<Node> a;
-    std::shared_ptr<Node> b;
-    std::shared_ptr<Node> p;
-    std::shared_ptr<Node> h = nullptr;
-
-    for(std::shared_ptr<Node>i = head; i != nullptr; )
-    {
-        a = i;
-        i = i->next;
-        b = h;
-
-        for (p = nullptr; (b != nullptr) && (a->data > b->data == is_increase); )
-        {
-            p = b;
-            b = b->next;
-        }
-
-        if(p == nullptr)
-        {
-            a->next = h;
-            h = a;
-        }
-        else
-        {
-            a->next = b;
-            p->next = a;
-        }
-    }
-    if(h != nullptr)
-        head = h;
-    while (h->next != nullptr)
-    {
-        h = h->next;
-    }
-    tail = h;
-}
-
-template<class T>
-void List<T>::reverse()
-{
-    std::shared_ptr<Node> new_head = nullptr;
-    //читаем элементы старого списка
-    for(std::shared_ptr<Node> pos = head; pos;)
-    {
-        std::shared_ptr<Node> save_next = pos->next;
-        pos->next = new_head;
-        new_head = pos;
-        pos = save_next;
-    }
-    tail = head;
-    tail->next = nullptr;
-    head = new_head;
-}
-
-template<class T>
-int List<T>::get_index(const T elem)
-{
-    size_t count = 0;
-    std::shared_ptr<Node> ptr = head;
-    while (ptr != nullptr)
-    {
-        if (ptr->data == elem)
-        {
-            return count;
-        }
-        ptr = ptr->next;
-        count++;
-    }
-    return -1;
-}
-
-template<class T>
-void List<T>::clear()
-{
-    std::shared_ptr<Node> temp_ptr = head;
-    while (head != nullptr)
-    {
-        head.reset();
-        temp_ptr = temp_ptr->next;
-        head = temp_ptr;
-    }
-    tail = nullptr;
-    length = 0;
-}
 
 #endif //OOP2_LIST_H
