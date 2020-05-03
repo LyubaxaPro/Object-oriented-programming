@@ -13,17 +13,34 @@
 
 template <typename T>
 class List: ListBase{
-public:
-    // конструктор по умолчанию
-    List();
 
+private:
+    template <typename Ptr, typename Ref, typename ListPtr>
+    class Iterator;
+
+public:
+    using iterator =  Iterator<T*, T&, List<T>*>;
+    using const iterator =  Iterator<T*, T&, List<T>*>;
+
+    iterator begin() {
+        return iterator(this, true);
+    }
+    iterator end() {
+        return iterator(this, false);
+    }
+
+    //Конструкторы
+    // конструктор по умолчанию
+    List() = default;
     // конструктор копирования
     List(const List<T>& lst);
-
     // список из массива
-    List(T *arr, size_t size);
+    List(const T *arr, int size);
+    //явный конструктор со списком инициализации
+    List(const std::initializer_list<T>& lst);
+    //инициализация через итераторы
+    List(iterator begin, iterator end);
 
-    explicit List(const std::initializer_list<T>& lst);
 
     // деструктор
     ~List();
@@ -91,17 +108,17 @@ public:
 
     // перегрузка оператора +, работает аналогично Combine.
     friend List<T> operator +(const List<T>& l1, const List<T>& l2) {
-        List<T> result_list; // todo new?
-        auto cur_ptr = l1.head;
-        while (cur_ptr != nullptr) {
-            result_list->push_back(cur_ptr->data);
-            cur_ptr = cur_ptr->next;
+        List <T>result_list;
+        auto curr_ptr = l1.head;
+        while (curr_ptr != nullptr) {
+            result_list->push_back(curr_ptr->data);
+            curr_ptr = curr_ptr->next;
         }
 
-        cur_ptr = l2.head;
-        while (cur_ptr != nullptr) {
-            result_list->push_back(cur_ptr->data);
-            cur_ptr = cur_ptr->next;
+        curr_ptr = l2.head;
+        while (curr_ptr != nullptr) {
+            result_list->push_back(curr_ptr->data);
+            curr_ptr = curr_ptr->next;
         }
 
         return *result_list;
@@ -110,7 +127,7 @@ public:
 
 
         // перегрузка оператора +
-    List<T>& operator +(const T data) //todo T&
+    List<T>& operator +(const T& data) //todo T&
     {
         push_back(data);
         return *this;
@@ -118,12 +135,12 @@ public:
 
     List<T>& operator +(const List<T>& lst)
     {
-        std::shared_ptr<Node> cur_ptr = lst.head;
+        std::shared_ptr<Node> curr_ptr = lst.head;
 
-        while (cur_ptr != nullptr)
+        while (curr_ptr != nullptr)
         {
-            push_back(cur_ptr->data);
-            cur_ptr = cur_ptr->next;
+            push_back(curr_ptr->data);
+            curr_ptr = curr_ptr->next;
         }
         return *this;
     }
@@ -131,12 +148,12 @@ public:
     // перегрузка оператора +=, работает аналогично Combine, значение записывается в this.
     List<T>& operator +=(const List<T>& lst)
     {
-        std::shared_ptr<Node> cur_ptr = lst.head;
+        std::shared_ptr<Node> curr_ptr = lst.head;
 
-        while (cur_ptr != nullptr)
+        while (curr_ptr != nullptr)
         {
-            push_back(cur_ptr->data);
-            cur_ptr = cur_ptr->next;
+            push_back(curr_ptr->data);
+            curr_ptr = curr_ptr->next;
         }
         return *this;
     }
@@ -151,11 +168,11 @@ public:
     {
         if (length != lst.length) return false;
 
-        std::shared_ptr<Node> cur_ptr = head;
-        std::shared_ptr<Node> lst_cur_ptr = lst.head;
-        while(cur_ptr != nullptr && lst_cur_ptr != nullptr)
+        std::shared_ptr<Node> curr_ptr = head;
+        std::shared_ptr<Node> lst_curr_ptr = lst.head;
+        while(curr_ptr != nullptr && lst_curr_ptr != nullptr)
         {
-            if (cur_ptr->data != lst_cur_ptr->data) return false;
+            if (curr_ptr->data != lst_curr_ptr->data) return false;
         }
         return true;
     }
@@ -164,58 +181,43 @@ public:
     {
         if (length != lst.length) return true;
 
-        std::shared_ptr<Node> cur_ptr = head;
-        std::shared_ptr<Node> lst_cur_ptr = lst.head;
-        while(cur_ptr != nullptr && lst_cur_ptr != nullptr)
+        std::shared_ptr<Node> curr_ptr = head;
+        std::shared_ptr<Node> lst_curr_ptr = lst.head;
+        while(curr_ptr != nullptr && lst_curr_ptr != nullptr)
         {
-            if (cur_ptr->data != lst_cur_ptr->data) return true;
+            if (curr_ptr->data != lst_curr_ptr->data) return true;
         }
         return false;
     }
 
-    template<typename _T>
-    friend std::ostream& operator <<(std::ostream& os, const List<_T>& lst)
+    friend std::ostream& operator <<(std::ostream& os, const List<T>& lst)
     {
         os << "List ";
-        std::shared_ptr<Node> cur_ptr = lst.head;
-        while(cur_ptr != nullptr)
+        std::shared_ptr<Node> curr_ptr = lst.head;
+        while(curr_ptr != nullptr)
         {
-            os << cur_ptr->data << "->";  // todo cur_ptr -> curr_ptr
-            cur_ptr = cur_ptr->next;
+            os << curr_ptr->data << "->";
+            curr_ptr = curr_ptr->next;
         }
-        os << "nullptr";
+        os << std::endl;
         return os;
     }
 
 protected:
-    size_t length;
     struct Node
     {
         T data;
-        std::shared_ptr<Node> next;
-        explicit Node(const T& elem);
+        std::shared_ptr<Node> next = nullptr;
+        explicit Node(const T& elem) : data(elem) {};
 
-        ~Node()= default;
+        ~Node() = default;
     };
 
-private:
-    template <typename Ptr, typename Ref, typename ListPtr>
-    class Iterator;
-
-public:
-    typedef Iterator<T*, T&, List<T>*> iterator;
-
-    const iterator begin() {
-        return iterator(this, true);
-    }
-    const iterator end() {
-        return iterator(this, false);
-    }
-
 
 private:
-    std::shared_ptr<Node> head;
-    std::shared_ptr<Node> tail;
+    size_t length = 0;
+    std::shared_ptr<Node> head = nullptr;
+    std::shared_ptr<Node> tail = nullptr;
 
     std::shared_ptr<Node> find_elem_ptr(const size_t index)
     {
@@ -226,14 +228,14 @@ private:
         }
 
         size_t count = 0;
-        std::shared_ptr<Node> cur_ptr = head;
+        std::shared_ptr<Node> curr_ptr = head;
         while (count != index)
         {
-            cur_ptr = cur_ptr->next;
+            curr_ptr = curr_ptr->next;
             count++;
         }
 
-        return cur_ptr;
+        return curr_ptr;
     }
 
 };

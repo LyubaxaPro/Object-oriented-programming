@@ -13,48 +13,66 @@
 
 template <typename T>
 template <typename Ptr, typename Ref, typename ListPtr>
-class  List<T>::Iterator : public std::iterator<std::forward_iterator_tag, T, ptrdiff_t, Ptr, Ref>
-{
+class  List<T>::Iterator : public std::iterator<std::forward_iterator_tag, T, ptrdiff_t, Ptr, Ref> {
 private:
     ListPtr list;
     std::shared_ptr<Node> curr_ptr;
 
 public:
-    Iterator(ListPtr list, bool is_begin) : list(list) {
+    Iterator(ListPtr list, bool is_begin) : list(list)
+    {
         curr_ptr = is_begin ? (*list).head : (*list).tail->next;
     }
 
-    Ref operator*() {
+    Ref operator*()
+    {
         return curr_ptr->data;
     }
 
-    Ptr operator->() {
+    Ptr operator->()
+    {
         return &(curr_ptr->data);
     }
 
-    Iterator next() {
+    Iterator next()
+    {
         Iterator tmp = *this;
         tmp.curr_ptr = tmp.curr_ptr->next;
         return tmp;
     }
 
-    Iterator operator++(int) { // i++
+    bool is_valid()
+    {
+        return curr_ptr != nullptr && list != nullptr;
+    }
+
+    T value()
+    {
+        return curr_ptr->data;;
+    }
+
+    Iterator operator++(int)
+    { // i++
         Iterator tmp = *this;
         curr_ptr = curr_ptr->next;
         return tmp;
     }
 
-    Iterator& operator++() { // ++i
+    Iterator &operator++()
+    { // ++i
         curr_ptr = curr_ptr->next;
         return *this;
     }
 
-    bool operator==(const Iterator& right)const {
+    bool operator==(const Iterator &right) const
+    {
         return (curr_ptr == right.curr_ptr);
     }
-    bool operator!=(const Iterator& right) const {
+
+    bool operator!=(const Iterator &right) const
+    {
         return curr_ptr != right.curr_ptr;
     }
-};
 
+};
 #endif //OOP_SECOND_ITERATOR_H

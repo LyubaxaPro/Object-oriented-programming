@@ -6,15 +6,6 @@
 #include "errors.h"
 #include "iterator.h"
 
-
-template<typename T>
-List<T>::List()
-{
-    length = 0;
-    head = nullptr;
-    tail = nullptr;
-}
-
 template<typename T>
 List<T>::List(const List<T>& lst)
 {
@@ -24,16 +15,15 @@ List<T>::List(const List<T>& lst)
         push_back(cur_ptr->data);
         cur_ptr = cur_ptr->next;
     }
-    length = lst.length;
 }
 
 template<typename T>
-List<T>::List(T *arr, size_t size)
+List<T>::List(const T *arr, int size)
 {
-    length = 0;
-    head = nullptr;
-    tail = nullptr;
-
+    if (size < 0)
+        throw RangeError();
+    if (arr == nullptr)
+        throw MemError();
     for (size_t i = 0; i < size; i++)
     {
         push_back(arr[i]);
@@ -41,18 +31,24 @@ List<T>::List(T *arr, size_t size)
 }
 
 template<typename T>
-List<T>::List(const std::initializer_list<T>& lst) : length(0)
+List<T>::List(const std::initializer_list<T>& lst)
 {
-    for (const auto& it: lst) {
+    for (const auto& it: lst)
+    {
         push_back(it);
     }
 }
 
 template<typename T>
-List<T>::Node:: Node(const T& elem)
+List<T>::List(List::iterator begin, List::iterator end)
 {
-    data = elem;
-    next = nullptr;
+    if (!begin.is_valid())
+        throw RangeError();
+
+    for (auto i = begin; i != end; ++i)
+    {
+        push_back(*i);
+    }
 }
 
 template<typename T>
@@ -70,15 +66,11 @@ bool List<T>::is_empty() const
 template<typename T>
 void List<T>::clear()
 {
-    std::shared_ptr<Node> temp_ptr = head;
-    while (head != nullptr)
+    size_t size = length;
+    for (int i = 0; i < size; i++)
     {
-        head.reset();
-        temp_ptr = temp_ptr->next;
-        head = temp_ptr;
+        pop_front();
     }
-    tail = nullptr;
-    length = 0;
 }
 
 template<typename T>
@@ -126,7 +118,7 @@ T List<T>::pop_back()
 {
     if (length == 0)
     {
-        throw emptyError();
+        throw EmptyError();
     }
     std::shared_ptr<Node> ptr = head;
     std::shared_ptr<Node> prev_ptr = head;
@@ -152,8 +144,7 @@ T List<T>::pop_front()
 {
     if (length == 0)
     {
-        std::cout << "List is empty" << std::endl;
-        throw 0;
+        throw EmptyError();
     }
     std::shared_ptr<Node> cur_ptr = head->next;
     T data = head->data;
@@ -170,12 +161,10 @@ T List<T>::pop_front()
 template<typename T>
 void List<T>::push_range_back(const List<T> &lst)
 {
-    std::shared_ptr<Node> cur_ptr = lst.head;
-
-    while (cur_ptr != nullptr)
+    if (lst.is_empty()) return;
+    for (const auto& it: lst)
     {
-        push_back(cur_ptr->data);
-        cur_ptr = cur_ptr->next;
+        push_back(it);
     }
 }
 
@@ -260,7 +249,7 @@ void List<T>::remove_elem(const size_t index)
 template<typename T>
 List<T>& List<T>::combine(const List<T> &lst)
 {
-    List<T> *result_list = new List<T>;
+    List<T> result_list;
     std::shared_ptr<Node> cur_ptr = head;
     while(cur_ptr != nullptr)
     {
@@ -295,7 +284,6 @@ T* List<T>::to_array()
 template<typename T>
 void List<T>::sort(bool is_increase)
 {
-    // todo make faster
     std::shared_ptr<Node> a;
     std::shared_ptr<Node> b;
     std::shared_ptr<Node> p;
@@ -379,4 +367,5 @@ List<T>& List<T>::operator=(const List<T> &lst)
     }
     return *this;
 }
+
 

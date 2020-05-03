@@ -7,8 +7,7 @@
 
 #include <exception>
 
-//todo : класс c большой буквы
-class baseError : public std::exception
+class BaseError : public std::exception
 {
 public:
     const char* what() const noexcept override {
@@ -17,21 +16,21 @@ public:
 
 };
 
-class memError : public baseError
+class MemError : public BaseError
 {
     const char* what() const noexcept override {
         return "A memory allocation error";
     }
 };
 
-class rangeError : public baseError
+class RangeError : public BaseError
 {
     const char* what() const noexcept override {
         return "List is out of range";
     }
 };
 
-class cmpIterError : public baseError
+class CmpIterError : public BaseError
 {
 public:
 
@@ -40,7 +39,7 @@ public:
     }
 };
 
-class emptyError : public baseError
+class EmptyError : public BaseError
 {
 public:
 
