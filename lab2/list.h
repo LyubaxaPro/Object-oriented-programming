@@ -10,6 +10,7 @@
 #include <iterator>
 
 #include "list_base.h"
+#include "errors.h"
 
 template <typename T>
 class List: ListBase{
@@ -20,14 +21,13 @@ private:
 
 public:
     using iterator =  Iterator<T*, T&, List<T>*>;
-    using const iterator =  Iterator<T*, T&, List<T>*>;
+    using const_iterator = Iterator<const T*, const T&, const List<T>*>;
 
-    iterator begin() {
-        return iterator(this, true);
-    }
-    iterator end() {
-        return iterator(this, false);
-    }
+    iterator begin();
+    iterator end();
+    const const_iterator begin() const;
+    const const_iterator end() const;
+
 
     //Конструкторы
     // конструктор по умолчанию
@@ -73,22 +73,22 @@ public:
     void push_range_front(const List<T>& lst);
 
     //добавить массив элементов в конец списка
-    void push_range_back(T *const arr, const size_t& size);
+    void push_range_back(T *arr, int size);
 
     //добавить массив элементов в начало списка
-    void push_range_front(T *const arr, const size_t size);
+    void push_range_front(T *arr, int size);
 // todo разобраться с const const&
     // изменить элемент списка по индексу
-    void set_elem(const size_t index,const T& elem);
+    void set_elem(int index, const T& elem);
 
     // получить элемент списка по индексу
-    T& get_elem(const size_t index) const;
+    T& get_elem(int index) const;
 
     // удалить элемент списка по индексу
-    void remove_elem(const size_t index);
+    void remove_elem(int index);
 
     // объединение списка с другим списком (метод возвращает новый список, содержащий сначала элементы текущего списка, затем, переданного в Combine)
-    List<T>& combine(const List<T>& lst);
+    List<T> combine(const List<T>& lst);
 
     // сортировк вставками
     void sort(bool is_increase);
@@ -164,30 +164,22 @@ public:
         return *this;
     }
 
-    bool operator ==(const List<T>& lst) const
+    bool operator ==(const List<T>& lst) const    //todo :  два итератора
     {
         if (length != lst.length) return false;
-
+        if (!length) return true;
         std::shared_ptr<Node> curr_ptr = head;
-        std::shared_ptr<Node> lst_curr_ptr = lst.head;
-        while(curr_ptr != nullptr && lst_curr_ptr != nullptr)
+        for (auto it: lst)
         {
-            if (curr_ptr->data != lst_curr_ptr->data) return false;
+            if (curr_ptr->data != it) return false;
+            curr_ptr = curr_ptr->next;
         }
         return true;
     }
 
     bool operator != (const List<T>& lst) const
     {
-        if (length != lst.length) return true;
-
-        std::shared_ptr<Node> curr_ptr = head;
-        std::shared_ptr<Node> lst_curr_ptr = lst.head;
-        while(curr_ptr != nullptr && lst_curr_ptr != nullptr)
-        {
-            if (curr_ptr->data != lst_curr_ptr->data) return true;
-        }
-        return false;
+        return !(this == lst);
     }
 
     friend std::ostream& operator <<(std::ostream& os, const List<T>& lst)
@@ -219,12 +211,11 @@ private:
     std::shared_ptr<Node> head = nullptr;
     std::shared_ptr<Node> tail = nullptr;
 
-    std::shared_ptr<Node> find_elem_ptr(const size_t index)
+    std::shared_ptr<Node> find_elem_ptr(int index) const
     {
         if (index >= length or index < 0)
         {
-            std::cout << "Wrong index!" << std::endl;
-            throw 0;
+            throw RangeError();
         }
 
         size_t count = 0;

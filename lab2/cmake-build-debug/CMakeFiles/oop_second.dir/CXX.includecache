@@ -6,11 +6,11 @@
 
 #IncludeRegexTransform: 
 
-/home/maksim/CLionProjects/sova/oop_second/errors.h
+/home/maksim/Object-oriented-programming/lab2/errors.h
 exception
 -
 
-/home/maksim/CLionProjects/sova/oop_second/iterator.h
+/home/maksim/Object-oriented-programming/lab2/iterator.h
 iostream
 -
 cstdlib
@@ -18,17 +18,9 @@ cstdlib
 iterator
 -
 list.h
-/home/maksim/CLionProjects/sova/oop_second/list.h
+/home/maksim/Object-oriented-programming/lab2/list.h
 
-/home/maksim/CLionProjects/sova/oop_second/list.cpp
-list.h
-/home/maksim/CLionProjects/sova/oop_second/list.h
-errors.h
-/home/maksim/CLionProjects/sova/oop_second/errors.h
-iterator.h
-/home/maksim/CLionProjects/sova/oop_second/iterator.h
-
-/home/maksim/CLionProjects/sova/oop_second/list.h
+/home/maksim/Object-oriented-programming/lab2/list.h
 memory
 -
 iostream
@@ -36,17 +28,27 @@ iostream
 iterator
 -
 list_base.h
-/home/maksim/CLionProjects/sova/oop_second/list_base.h
+/home/maksim/Object-oriented-programming/lab2/list_base.h
+errors.h
+/home/maksim/Object-oriented-programming/lab2/errors.h
 
-/home/maksim/CLionProjects/sova/oop_second/list_base.h
+/home/maksim/Object-oriented-programming/lab2/list.hpp
+list.h
+/home/maksim/Object-oriented-programming/lab2/list.h
+errors.h
+/home/maksim/Object-oriented-programming/lab2/errors.h
+iterator.h
+/home/maksim/Object-oriented-programming/lab2/iterator.h
+
+/home/maksim/Object-oriented-programming/lab2/list_base.h
 cstdlib
 -
 
-/home/maksim/CLionProjects/sova/oop_second/main.cpp
+/home/maksim/Object-oriented-programming/lab2/main.cpp
 iostream
 -
 list.h
-/home/maksim/CLionProjects/sova/oop_second/list.h
-list.cpp
-/home/maksim/CLionProjects/sova/oop_second/list.cpp
+/home/maksim/Object-oriented-programming/lab2/list.h
+list.hpp
+/home/maksim/Object-oriented-programming/lab2/list.hpp
 

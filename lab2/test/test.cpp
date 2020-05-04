@@ -6,7 +6,7 @@
 #include "gtest/gtest.h"
 #include "../list.h"
 #include "../iterator.h"
-#include "../list.cpp"
+#include "../list.hpp"
 #include "../errors.h"
 
 TEST(ConstructorTest, constructor_from_array_size_1)
@@ -199,7 +199,7 @@ TEST(Method_pop_front, from_full_list)
     ASSERT_TRUE(list.pop_front() == 1 && list.get_length() == 2);
 }
 
-TEST(Method_pop_frot, from_one_elem_list)
+TEST(Method_pop_front, from_one_elem_list)
 {
     List<int> list({1});
     ASSERT_TRUE(list.pop_front() == 1 && list.is_empty());
@@ -214,6 +214,209 @@ TEST(Method_push_range_back, push_empty_list)
     ASSERT_TRUE(list == list2);
 }
 
+TEST(Method_push_range_back, push_in_empty_list)
+{
+    List<int> list({1, 2, 3});
+    List<int> list2({1, 2, 3});
+    List<int> list1;
+    list1.push_range_back(list);
+    ASSERT_TRUE(list1 == list2);
+}
+
+TEST(Method_push_range_back, push_list)
+{
+    List<int> list({1, 2, 3});
+    List<int> list2({4, 5, 6});
+    int t[6] = {1, 2, 3, 4, 5, 6};
+    list.push_range_back(list2);
+    size_t i = 0;
+    ASSERT_TRUE(list.get_length() == 6);
+    for (auto it: list)
+    {
+        ASSERT_TRUE(it == t[i]);
+        i++;
+    }
+}
+
+TEST(Method_push_range_front, push_empty_list)
+{
+    List<int> list({1, 2, 3});
+    List<int> list2({1, 2, 3});
+    List<int> list1;
+    list.push_range_front(list1);
+    ASSERT_TRUE(list == list2);
+}
+
+TEST(Method_push_range_front, push_list)
+{
+    List<int> list({1, 2, 3});
+    List<int> list2({4, 5, 6});
+    int t[6] = {4, 5, 6, 1, 2, 3};
+    list.push_range_front(list2);
+    size_t i = 0;
+    ASSERT_TRUE(list.get_length() == 6);
+    for (auto it: list)
+    {
+        ASSERT_TRUE(it == t[i]);
+        i++;
+    }
+}
+
+TEST(Method_push_range_front, push_in_empty_list)
+{
+    List<int> list({1, 2, 3});
+    List<int> list2({1, 2, 3});
+    List<int> list1;
+    list1.push_range_front(list);
+    ASSERT_TRUE(list1 == list2);
+}
+
+TEST(Method_push_range_back, push_arr_with_bad_size)
+{
+    int arr[3] = {3, 3, 3};
+    List<int> list;
+    ASSERT_THROW(list.push_range_back(arr, -3), RangeError);
+}
+
+TEST(Method_push_range_back, push_arr_with_bad_ptr)
+{
+    List<int> list;
+    ASSERT_THROW(list.push_range_back(nullptr, 3), MemError);
+}
+
+TEST(Method_push_range_back, push_arr)
+{
+    List<int> list({3});
+    int arr[3] = {4, 5, 6};
+    int new_arr[4] = {3, 4, 5, 6};
+    list.push_range_back(arr, 3);
+    ASSERT_TRUE(list.get_length() == 4);
+    size_t i = 0;
+    for (auto it: list)
+    {
+        ASSERT_TRUE(it == new_arr[i]);
+        i++;
+    }
+}
+
+TEST(Method_push_range_front, push_arr_with_bad_size)
+{
+    int arr[3] = {3, 3, 3};
+    List<int> list;
+    ASSERT_THROW(list.push_range_front(arr, -3), RangeError);
+}
+
+TEST(Method_push_range_front, push_arr_with_bad_ptr)
+{
+    List<int> list;
+    ASSERT_THROW(list.push_range_front(nullptr, 3), MemError);
+}
+
+TEST(Method_push_range_front, push_arr)
+{
+    List<int> list({3});
+    int arr[3] = {4, 5, 6};
+    int new_arr[4] = {4, 5, 6, 3};
+    list.push_range_front(arr, 3);
+    ASSERT_TRUE(list.get_length() == 4);
+    size_t i = 0;
+    for (auto it: list)
+    {
+        ASSERT_TRUE(it == new_arr[i]);
+        i++;
+    }
+}
+
+TEST(Method_set_elem, index_is_negative)
+{
+    List<int> list;
+    ASSERT_THROW(list.set_elem(-4, 3), RangeError);
+}
+
+TEST(Method_set_elem, index_out_of_list)
+{
+    List<int> list;
+    ASSERT_THROW(list.set_elem(4, 3), RangeError);
+}
+
+TEST(Method_set_elem, set_elem)
+{
+    List<int> list({4, 5, 6, 7, 8});
+    list.set_elem(3, 0);
+
+    List<int> right_list({4, 5, 6, 0, 8});
+
+    ASSERT_TRUE(right_list == list);
+}
+
+TEST(Method_get_elem, index_is_negative)
+{
+    List<int> list;
+    ASSERT_THROW(list.get_elem(-4), RangeError);
+}
+
+TEST(Method_get_elem, index_out_of_list)
+{
+    List<int> list;
+    ASSERT_THROW(list.get_elem(4), RangeError);
+}
+
+TEST(Method_get_elem, get_elem)
+{
+    List<int> list({4, 5, 6, 7, 8});
+    int elem = list.get_elem(3);
+    List<int> right_list({4, 5, 6, 7, 8});
+
+    ASSERT_TRUE(right_list == list && elem == 7);
+}
+
+TEST(Method_remove_elem, index_is_negative)
+{
+    List<int> list;
+    ASSERT_THROW(list.remove_elem(-4), RangeError);
+}
+
+TEST(Method_remove_elem, index_out_of_list)
+{
+    List<int> list;
+    ASSERT_THROW(list.remove_elem(4), RangeError);
+}
+
+TEST(Method_remove_elem, remove_elem)
+{
+    List<int> list({4, 5, 6, 7, 8});
+    list.remove_elem(3);
+    List<int> right_list({4, 5, 6, 8});
+
+    ASSERT_TRUE(right_list == list );
+}
+
+TEST(Method_combine, both_empty)
+{
+    List<int> list;
+    List<int> list_a;
+    List<int> list_b;
+//
+    List<int> list_res;
+    list = list_a.combine(list_b);
+    ASSERT_TRUE(list_res == list);
+
+
+}
+
+TEST(MY, TT)
+{
+    List<int> list;
+    list.push_back(4);
+    list.push_back(5);
+    list.push_back(6);
+
+    List<int> list4();
+    list = list_a.combine(list_b);
+    ASSERT_TRUE(list_res == list);
+
+
+}
 
 
 

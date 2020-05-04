@@ -21,7 +21,7 @@ private:
 public:
     Iterator(ListPtr list, bool is_begin) : list(list)
     {
-        curr_ptr = is_begin ? (*list).head : (*list).tail->next;
+        curr_ptr = is_begin ? (*list).head : nullptr;
     }
 
     Ref operator*()
@@ -75,4 +75,25 @@ public:
     }
 
 };
+
+template <typename T>
+typename List<T>::iterator List<T>::begin()  {
+    return iterator(this, true);
+}
+
+template <typename T>
+typename List<T>::iterator List<T>::end() {
+    return iterator(this, false);
+}
+
+template <typename T>
+const typename List<T>::const_iterator List<T>::begin() const  {
+    return const_iterator(this, true);
+}
+
+template <typename T>
+const typename List<T>::const_iterator List<T>::end() const  {
+    return const_iterator(this, false);
+
+
 #endif //OOP_SECOND_ITERATOR_H

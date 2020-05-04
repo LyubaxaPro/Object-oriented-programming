@@ -4,13 +4,14 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/maksim/CLionProjects/sova/oop_second/list.cpp" "/home/maksim/CLionProjects/sova/oop_second/cmake-build-debug/CMakeFiles/oop_second.dir/list.cpp.o"
-  "/home/maksim/CLionProjects/sova/oop_second/main.cpp" "/home/maksim/CLionProjects/sova/oop_second/cmake-build-debug/CMakeFiles/oop_second.dir/main.cpp.o"
+  "/home/maksim/Object-oriented-programming/lab2/main.cpp" "/home/maksim/Object-oriented-programming/lab2/cmake-build-debug/CMakeFiles/oop_second.dir/main.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 
 # The include file search paths:
 set(CMAKE_CXX_TARGET_INCLUDE_PATH
+  "../lib/googletest-master/googletest/include"
+  "../lib/googletest-master/googlemock/include"
   )
 
 # Targets to which this target links.

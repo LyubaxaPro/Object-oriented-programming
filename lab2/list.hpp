@@ -171,19 +171,30 @@ void List<T>::push_range_back(const List<T> &lst)
 template<typename T>
 void List<T>::push_range_front(const List<T> &lst)
 {
-    List<T> ListCopy(lst);
-    ListCopy.reverse();
-    std::shared_ptr<Node> cur_ptr = ListCopy.head;
-    while(cur_ptr != nullptr)
+    if (lst.is_empty()) return;
+
+    List<T> list_copy(lst);
+    list_copy.reverse();
+
+    for (const auto& it: list_copy)
     {
-        push_front(cur_ptr->data);
-        cur_ptr = cur_ptr->next;
+        push_front(it);
     }
 }
 
 template<typename T>
-void List<T>::push_range_back(T *const arr, const size_t& size)
+void List<T>::push_range_back(T *const arr, int size)
 {
+    if (size < 0)
+    {
+        throw RangeError();
+    }
+
+    if (arr == nullptr)
+    {
+        throw MemError();
+    }
+
     for (size_t i = 0; i < size; i++)
     {
         push_back(arr[i]);
@@ -191,45 +202,56 @@ void List<T>::push_range_back(T *const arr, const size_t& size)
 }
 
 template<typename T>
-void List<T>::push_range_front(T *const arr, const size_t size)
+void List<T>::push_range_front(T *const arr, int size)
 {
-    for (size_t i = size - 1; i >= 0; i--)
+    if (size < 0)
+    {
+        throw RangeError();
+    }
+
+    if (arr == nullptr)
+    {
+        throw MemError();
+    }
+
+    for (int i = size - 1; i >= 0; i--)
     {
         push_front(arr[i]);
     }
 }
 
 template<typename T>
-void List<T>::set_elem(const size_t index, const T &elem)
+void List<T>::set_elem(int index, const T &elem)
 {
     std::shared_ptr<Node> cur_ptr = find_elem_ptr(index);
     cur_ptr->data = elem;
 }
 
 template<typename T>
-T& List<T>::get_elem(const size_t index) const
+T& List<T>::get_elem(int index) const
 {
     std::shared_ptr<Node> cur_ptr = find_elem_ptr(index);
     return cur_ptr->data;
 }
 
 template<typename T>
-void List<T>::remove_elem(const size_t index)
+void List<T>::remove_elem(int index)
 {
     if (index >= length or index < 0)
     {
-        std::cout << "Wrong index!" << std::endl;
-        throw 0;
+        throw RangeError();
     }
 
     if (index == 0)
     {
         pop_front();
     }
+
     else if (index == length - 1)
     {
         pop_back();
     }
+
     else
     {
         size_t count = 0;
@@ -247,24 +269,16 @@ void List<T>::remove_elem(const size_t index)
 }
 
 template<typename T>
-List<T>& List<T>::combine(const List<T> &lst)
+List<T> List<T>::combine(const List<T> &lst)
 {
     List<T> result_list;
-    std::shared_ptr<Node> cur_ptr = head;
-    while(cur_ptr != nullptr)
-    {
-        result_list->push_back(cur_ptr->data);
-        cur_ptr = cur_ptr->next;
+    for (const auto& it: *this) {
+        result_list.push_back(it);
     }
-
-    cur_ptr = lst.head;
-    while(cur_ptr != nullptr)
-    {
-        result_list->push_back(cur_ptr->data);
-        cur_ptr = cur_ptr->next;
+    for (const auto& it: lst) {
+        result_list.push_back(it);
     }
-
-    return *result_list;
+    return result_list;
 }
 
 template<typename T>
