@@ -289,47 +289,6 @@ T* List<T>::to_array()
 }
 
 template<typename T>
-void List<T>::sort(bool is_increase)
-{
-    if (is_empty()) return;
-    std::shared_ptr<Node> a;
-    std::shared_ptr<Node> b;
-    std::shared_ptr<Node> p;
-    std::shared_ptr<Node> h = nullptr;
-
-    for(std::shared_ptr<Node>i = head; i != nullptr; )
-    {
-        a = i;
-        i = i->next;
-        b = h;
-
-        for (p = nullptr; (b != nullptr) && (a->data > b->data == is_increase); )
-        {
-            p = b;
-            b = b->next;
-        }
-
-        if(p == nullptr)
-        {
-            a->next = h;
-            h = a;
-        }
-        else
-        {
-            a->next = b;
-            p->next = a;
-        }
-    }
-    if(h != nullptr)
-        head = h;
-    while (h->next != nullptr)
-    {
-        h = h->next;
-    }
-    tail = h;
-}
-
-template<typename T>
 void List<T>::reverse()
 {
     if (is_empty()) return;

@@ -12,14 +12,13 @@
 #include "list.h"
 
 template <typename T>
-template <typename Ptr, typename Ref, typename ListPtr>
+template <typename Ptr, typename Ref>
 class  List<T>::Iterator : public std::iterator<std::forward_iterator_tag, T, ptrdiff_t, Ptr, Ref> {
 private:
-    ListPtr list;
-    std::shared_ptr<Node> curr_ptr;
+    std::weak_ptr<Node> curr_ptr;
 
 public:
-    Iterator(ListPtr list, bool is_begin);
+    Iterator(std::shared_ptr<Node> node_ptr);
 
     Ref operator*();
 
@@ -39,9 +38,6 @@ public:
     bool operator!=(const Iterator &right) const;
 
 };
-
-
-
 
 #endif //OOP_SECOND_ITERATOR_H
 

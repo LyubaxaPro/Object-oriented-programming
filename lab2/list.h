@@ -16,12 +16,12 @@ template <typename T>
 class List: ListBase{
 
 private:
-    template <typename Ptr, typename Ref, typename ListPtr>
+    template <typename Ptr, typename Ref>
     class Iterator;
 
 public:
-    using iterator =  Iterator<T*, T&, List<T>*>;
-    using const_iterator = Iterator<const T*, const T&, const List<T>*>;
+    using iterator =  Iterator<T*, T&>;
+    using const_iterator = Iterator<const T*, const T&>;
 
     iterator begin();
     iterator end();
@@ -89,9 +89,6 @@ public:
 
     // объединение списка с другим списком (метод возвращает новый список, содержащий сначала элементы текущего списка, затем, переданного в Combine)
     List<T> combine(const List<T>& lst);
-
-    // сортировк вставками
-    void sort(bool is_increase);
 
     // развернуть список
     void reverse();

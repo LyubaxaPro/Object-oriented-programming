@@ -451,38 +451,6 @@ TEST(Method_to_array, list_to_array)
     delete arr;
 }
 
-TEST(Method_sort, sort_empty_list)
-{
-    List<int> list;
-    List<int> list_res;
-    list.sort(true);
-    ASSERT_TRUE(list == list_res);
-}
-
-TEST(Method_sort, is_increase)
-{
-    List<int> list({1, 4, 2, 3, 5});
-    List<int> list_res({1, 2, 3, 4, 5});
-    list.sort(true);
-    ASSERT_TRUE(list == list_res);
-}
-
-TEST(Method_sort, is_not_increase)
-{
-    List<int> list({1, 4, 2, 3, 5});
-    List<int> list_res({5, 4, 3, 2, 1});
-    list.sort(false);
-    ASSERT_TRUE(list == list_res);
-}
-
-TEST(Method_sort, list_have_dublicates)
-{
-    List<int> list({1, 2, 1, 2, 1, 2});
-    List<int> list_res({1, 1, 1, 2, 2, 2});
-    list.sort(true);
-    ASSERT_TRUE(list_res == list);
-}
-
 TEST(Method_reverse, empty_list)
 {
     List<int> list;
