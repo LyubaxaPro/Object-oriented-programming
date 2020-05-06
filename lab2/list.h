@@ -77,7 +77,7 @@ public:
 
     //добавить массив элементов в начало списка
     void push_range_front(T *arr, int size);
-// todo разобраться с const const&
+
     // изменить элемент списка по индексу
     void set_elem(int index, const T& elem);
 
@@ -107,93 +107,23 @@ public:
     List<T>& operator =(const List<T>& lst);
 
     // перегрузка оператора +, работает аналогично Combine.
-    friend List<T> operator +(const List<T>& l1, const List<T>& l2) {
-        List <T>result_list;
-        auto curr_ptr = l1.head;
-        while (curr_ptr != nullptr) {
-            result_list->push_back(curr_ptr->data);
-            curr_ptr = curr_ptr->next;
-        }
-
-        curr_ptr = l2.head;
-        while (curr_ptr != nullptr) {
-            result_list->push_back(curr_ptr->data);
-            curr_ptr = curr_ptr->next;
-        }
-
-        return *result_list;
-    }
-
-
+    friend List<T> operator +(const List<T>& l1, const List<T>& l2);
 
         // перегрузка оператора +
-    List<T>& operator +(const T& data) //todo T&
-    {
-        push_back(data);
-        return *this;
-    }
+    List<T> operator +(const T& data);
 
-    List<T>& operator +(const List<T>& lst)
-    {
-        std::shared_ptr<Node> curr_ptr = lst.head;
-
-        while (curr_ptr != nullptr)
-        {
-            push_back(curr_ptr->data);
-            curr_ptr = curr_ptr->next;
-        }
-        return *this;
-    }
+    List<T> operator +(const List<T>& lst);
 
     // перегрузка оператора +=, работает аналогично Combine, значение записывается в this.
-    List<T>& operator +=(const List<T>& lst)
-    {
-        std::shared_ptr<Node> curr_ptr = lst.head;
+    List<T>& operator +=(const List<T>& lst);
 
-        while (curr_ptr != nullptr)
-        {
-            push_back(curr_ptr->data);
-            curr_ptr = curr_ptr->next;
-        }
-        return *this;
-    }
+    List<T>& operator +=(const T& data);
 
-    List<T>& operator +=(const T data)
-    {
-        push_back(data);
-        return *this;
-    }
+    bool operator ==(const List<T>& lst) const;
 
-    bool operator ==(const List<T>& lst) const    //todo :  два итератора
-    {
-        if (length != lst.length) return false;
-        if (!length) return true;
-        std::shared_ptr<Node> curr_ptr = head;
-        for (auto it: lst)
-        {
-            if (curr_ptr->data != it) return false;
-            curr_ptr = curr_ptr->next;
-        }
-        return true;
-    }
+    bool operator != (const List<T>& lst) const;
 
-    bool operator != (const List<T>& lst) const
-    {
-        return !(this == lst);
-    }
-
-    friend std::ostream& operator <<(std::ostream& os, const List<T>& lst)
-    {
-        os << "List ";
-        std::shared_ptr<Node> curr_ptr = lst.head;
-        while(curr_ptr != nullptr)
-        {
-            os << curr_ptr->data << "->";
-            curr_ptr = curr_ptr->next;
-        }
-        os << std::endl;
-        return os;
-    }
+    friend std::ostream& operator <<(std::ostream& os, const List<T>& lst);
 
 protected:
     struct Node
@@ -211,23 +141,7 @@ private:
     std::shared_ptr<Node> head = nullptr;
     std::shared_ptr<Node> tail = nullptr;
 
-    std::shared_ptr<Node> find_elem_ptr(int index) const
-    {
-        if (index >= length or index < 0)
-        {
-            throw RangeError();
-        }
-
-        size_t count = 0;
-        std::shared_ptr<Node> curr_ptr = head;
-        while (count != index)
-        {
-            curr_ptr = curr_ptr->next;
-            count++;
-        }
-
-        return curr_ptr;
-    }
+    std::shared_ptr<Node> find_elem_ptr(int index) const;
 
 };
 

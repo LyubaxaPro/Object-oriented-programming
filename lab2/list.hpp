@@ -45,9 +45,9 @@ List<T>::List(List::iterator begin, List::iterator end)
     if (!begin.is_valid())
         throw RangeError();
 
-    for (auto i = begin; i != end; ++i)
+    for (auto& it = begin; it != end; ++it)
     {
-        push_back(*i);
+        push_back(it.value());
     }
 }
 
@@ -80,7 +80,7 @@ List<T>::~List()
 }
 
 template<typename T>
-void List<T>::push_back(const T &elem)
+void List<T>::push_back(const T& elem)
 {
     std::shared_ptr<Node> cur_node = std::make_shared<Node>(elem);
     if (tail == nullptr)
@@ -97,7 +97,7 @@ void List<T>::push_back(const T &elem)
 }
 
 template<typename T>
-void List<T>:: push_front(const T &elem)
+void List<T>:: push_front(const T& elem)
 {
     std::shared_ptr<Node> cur_node = std::make_shared<Node>(elem);
     if (head == nullptr)
@@ -159,9 +159,8 @@ T List<T>::pop_front()
 }
 
 template<typename T>
-void List<T>::push_range_back(const List<T> &lst)
+void List<T>::push_range_back(const List<T>& lst)
 {
-    if (lst.is_empty()) return;
     for (const auto& it: lst)
     {
         push_back(it);
@@ -169,10 +168,9 @@ void List<T>::push_range_back(const List<T> &lst)
 }
 
 template<typename T>
-void List<T>::push_range_front(const List<T> &lst)
+void List<T>::push_range_front(const List<T>& lst)
 {
     if (lst.is_empty()) return;
-
     List<T> list_copy(lst);
     list_copy.reverse();
 
@@ -221,7 +219,7 @@ void List<T>::push_range_front(T *const arr, int size)
 }
 
 template<typename T>
-void List<T>::set_elem(int index, const T &elem)
+void List<T>::set_elem(int index, const T& elem)
 {
     std::shared_ptr<Node> cur_ptr = find_elem_ptr(index);
     cur_ptr->data = elem;
@@ -254,28 +252,24 @@ void List<T>::remove_elem(int index)
 
     else
     {
-        size_t count = 0;
-        std::shared_ptr<Node> cur_ptr = head;
-        while (count + 1 != index) {
-            cur_ptr = cur_ptr->next;
-            count++;
-        }
-        std::shared_ptr<Node> elem = cur_ptr->next;
-
-        cur_ptr->next = elem->next;
+        std::shared_ptr<Node> prev_elem = find_elem_ptr(index - 1);
+        std::shared_ptr<Node> elem = prev_elem->next;
+        prev_elem-> next = elem->next;
         elem.reset();
         length--;
     }
 }
 
 template<typename T>
-List<T> List<T>::combine(const List<T> &lst)
+List<T> List<T>::combine(const List<T>& lst)
 {
     List<T> result_list;
-    for (const auto& it: *this) {
+    for (const auto& it: *this)
+    {
         result_list.push_back(it);
     }
-    for (const auto& it: lst) {
+    for (const auto& it: lst)
+    {
         result_list.push_back(it);
     }
     return result_list;
@@ -285,12 +279,11 @@ template<typename T>
 T* List<T>::to_array()
 {
     T *array = new T[length];
-    std::shared_ptr<Node> ptr = head;
     size_t i = 0;
-    while (ptr != nullptr)
+
+    for (const auto& it: *this)
     {
-        array[i++] = ptr->data;
-        ptr = ptr->next;
+        array[i++] = it;
     }
     return array;
 }
@@ -298,6 +291,7 @@ T* List<T>::to_array()
 template<typename T>
 void List<T>::sort(bool is_increase)
 {
+    if (is_empty()) return;
     std::shared_ptr<Node> a;
     std::shared_ptr<Node> b;
     std::shared_ptr<Node> p;
@@ -338,6 +332,7 @@ void List<T>::sort(bool is_increase)
 template<typename T>
 void List<T>::reverse()
 {
+    if (is_empty()) return;
     std::shared_ptr<Node> new_head = nullptr;
     //читаем элементы старого списка
     for(std::shared_ptr<Node> pos = head; pos;)
@@ -356,30 +351,112 @@ template<typename T>
 int List<T>::get_index(const T elem)
 {
     size_t count = 0;
-    std::shared_ptr<Node> ptr = head;
-    while (ptr != nullptr)
+    for (const auto& it: *this)
     {
-        if (ptr->data == elem)
+        if (it == elem)
         {
             return count;
         }
-        ptr = ptr->next;
         count++;
     }
     return -1;
 }
 
 template<typename T>
-List<T>& List<T>::operator=(const List<T> &lst)
+List<T>& List<T>::operator=(const List<T>& lst)
 {
     clear();
-    std::shared_ptr<Node> cur_ptr = lst.head;
-    while (cur_ptr != nullptr)
+    for (const auto& it: lst)
     {
-        push_back(cur_ptr->data);
-        cur_ptr = cur_ptr->next;
+        push_back(it);
     }
     return *this;
 }
 
+template<typename T>
+List<T> operator+(const List<T>& l1, const List<T>& l2)
+{
+    List<T> result_list;
+    result_list.push_range_back(l1);
+    result_list.push_range_back(l2);
+    return result_list;
+}
 
+template<typename T>
+List<T> List<T>::operator+(const T& data)
+{
+    List<T> res_list;
+    res_list.push_range_back(*this);
+    res_list.push_back(data);
+    return res_list;
+}
+
+template<typename T>
+List<T> List<T>::operator+(const List<T>& lst)
+{
+    return combine(lst);
+}
+
+template<typename T>
+List<T>& List<T>::operator+=(const List<T>& lst)
+{
+    push_range_back(lst);
+    return *this;
+}
+
+template<typename T>
+List<T>& List<T>::operator+=(const T& data)
+{
+    push_back(data);
+    return *this;
+}
+
+template<typename T>
+bool List<T>::operator==(const List<T>& lst) const
+{
+    if (length != lst.length) return false;
+    std::shared_ptr<Node> curr_ptr = head;
+    for (const auto& it: lst)
+    {
+        if (curr_ptr->data != it) return false;
+        curr_ptr = curr_ptr->next;
+    }
+    return true;
+}
+
+template<typename T>
+bool List<T>::operator!=(const List<T>& lst) const
+{
+    return !(*this == lst);
+}
+
+template<typename T>
+std::ostream& operator<<(std::ostream& os, const List<T>& lst)
+{
+    os << "List ";
+    for (const auto& it: lst)
+    {
+        os << it << "->";
+    }
+    os << std::endl;
+    return os;
+}
+
+template<typename T>
+std::shared_ptr<typename List<T>::Node> List<T>::find_elem_ptr(int index) const
+{
+    if (index >= length or index < 0)
+    {
+        throw RangeError();
+    }
+
+    size_t count = 0;
+    std::shared_ptr<Node> curr_ptr = head;
+    while (count != index)
+    {
+        curr_ptr = curr_ptr->next;
+        count++;
+    }
+
+    return curr_ptr;
+}

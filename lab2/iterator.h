@@ -19,81 +19,29 @@ private:
     std::shared_ptr<Node> curr_ptr;
 
 public:
-    Iterator(ListPtr list, bool is_begin) : list(list)
-    {
-        curr_ptr = is_begin ? (*list).head : nullptr;
-    }
+    Iterator(ListPtr list, bool is_begin);
 
-    Ref operator*()
-    {
-        return curr_ptr->data;
-    }
+    Ref operator*();
 
-    Ptr operator->()
-    {
-        return &(curr_ptr->data);
-    }
+    Ptr operator->();
 
-    Iterator next()
-    {
-        Iterator tmp = *this;
-        tmp.curr_ptr = tmp.curr_ptr->next;
-        return tmp;
-    }
+    Iterator next();
 
-    bool is_valid()
-    {
-        return curr_ptr != nullptr && list != nullptr;
-    }
+    bool is_valid();
 
-    T value()
-    {
-        return curr_ptr->data;;
-    }
+    T value();
 
-    Iterator operator++(int)
-    { // i++
-        Iterator tmp = *this;
-        curr_ptr = curr_ptr->next;
-        return tmp;
-    }
+    Iterator operator++(int);
 
-    Iterator &operator++()
-    { // ++i
-        curr_ptr = curr_ptr->next;
-        return *this;
-    }
+    Iterator& operator++();
+    bool operator==(const Iterator &right) const;
 
-    bool operator==(const Iterator &right) const
-    {
-        return (curr_ptr == right.curr_ptr);
-    }
-
-    bool operator!=(const Iterator &right) const
-    {
-        return curr_ptr != right.curr_ptr;
-    }
+    bool operator!=(const Iterator &right) const;
 
 };
 
-template <typename T>
-typename List<T>::iterator List<T>::begin()  {
-    return iterator(this, true);
-}
 
-template <typename T>
-typename List<T>::iterator List<T>::end() {
-    return iterator(this, false);
-}
-
-template <typename T>
-const typename List<T>::const_iterator List<T>::begin() const  {
-    return const_iterator(this, true);
-}
-
-template <typename T>
-const typename List<T>::const_iterator List<T>::end() const  {
-    return const_iterator(this, false);
 
 
 #endif //OOP_SECOND_ITERATOR_H
+

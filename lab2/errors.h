@@ -29,15 +29,6 @@ class RangeError : public BaseError
         return "List is out of range";
     }
 };
- // todo удалить несипользуемые ошибки
-class CmpIterError : public BaseError
-{
-public:
-
-    const char* what() const noexcept override {
-        return "Comparing iterators with different sources";
-    }
-};
 
 class EmptyError : public BaseError
 {

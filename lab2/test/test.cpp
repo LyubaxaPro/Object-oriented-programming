@@ -4,10 +4,8 @@
 
 
 #include "gtest/gtest.h"
-#include "../list.h"
-#include "../iterator.h"
 #include "../list.hpp"
-#include "../errors.h"
+#include "../iterator.hpp"
 
 TEST(ConstructorTest, constructor_from_array_size_1)
 {
@@ -22,7 +20,7 @@ TEST(ConstructorTest, constructor_from_array_size_n)
     int arr_size = 5;
     int i = 0;
     List<int> list1(arr1, 5);
-    for (auto it: list1)
+    for (const auto& it: list1)
     {
         ASSERT_TRUE(i < arr_size);
         ASSERT_TRUE(it == arr1[i]);
@@ -51,7 +49,7 @@ TEST(ConstructorTest, copy_list_constructor)
     List<int> list1(arr1, 5);
     List<int> list2(list1);
 
-    for (auto it: list2)
+    for (const auto& it: list2)
     {
         ASSERT_TRUE(i < arr_size);
         ASSERT_TRUE(it == arr1[i]);
@@ -66,7 +64,7 @@ TEST(ConstructorTest, constructor_from_initializer_list)
     int arr1[4] = {1, 2, 3, 4};
     int i = 0;
 
-    for (auto it: list1) {
+    for (const auto& it: list1) {
         ASSERT_TRUE(i < 4);
         ASSERT_TRUE(it == arr1[i]);
         i++;
@@ -81,7 +79,7 @@ TEST(ConstructorTest, constructor_using_iterator)
     int arr1[4] = {1, 2, 3, 4};
     int i = 0;
 
-    for (auto it: list1) {
+    for (const auto& it: list1) {
         ASSERT_TRUE(i < 4);
         ASSERT_TRUE(it == arr1[i]);
         i++;
@@ -144,7 +142,7 @@ TEST(Method_push_back, in_full_list)
 {
     List<int> list({1, 1});
     list.push_back(1);
-    for (auto it: list)
+    for (const auto& it: list)
     {
         ASSERT_TRUE(it == 1);
     }
@@ -162,7 +160,7 @@ TEST(Method_push_front, in_full_list)
 {
     List<int> list({1, 1});
     list.push_front(1);
-    for (auto it: list)
+    for (const auto& it: list)
     {
         ASSERT_TRUE(it == 1);
     }
@@ -231,7 +229,7 @@ TEST(Method_push_range_back, push_list)
     list.push_range_back(list2);
     size_t i = 0;
     ASSERT_TRUE(list.get_length() == 6);
-    for (auto it: list)
+    for (const auto& it: list)
     {
         ASSERT_TRUE(it == t[i]);
         i++;
@@ -255,7 +253,7 @@ TEST(Method_push_range_front, push_list)
     list.push_range_front(list2);
     size_t i = 0;
     ASSERT_TRUE(list.get_length() == 6);
-    for (auto it: list)
+    for (const auto& it: list)
     {
         ASSERT_TRUE(it == t[i]);
         i++;
@@ -292,7 +290,7 @@ TEST(Method_push_range_back, push_arr)
     list.push_range_back(arr, 3);
     ASSERT_TRUE(list.get_length() == 4);
     size_t i = 0;
-    for (auto it: list)
+    for (const auto& it: list)
     {
         ASSERT_TRUE(it == new_arr[i]);
         i++;
@@ -320,7 +318,7 @@ TEST(Method_push_range_front, push_arr)
     list.push_range_front(arr, 3);
     ASSERT_TRUE(list.get_length() == 4);
     size_t i = 0;
-    for (auto it: list)
+    for (const auto& it: list)
     {
         ASSERT_TRUE(it == new_arr[i]);
         i++;
@@ -396,27 +394,281 @@ TEST(Method_combine, both_empty)
     List<int> list;
     List<int> list_a;
     List<int> list_b;
-//
+
     List<int> list_res;
     list = list_a.combine(list_b);
     ASSERT_TRUE(list_res == list);
-
-
 }
 
-TEST(MY, TT)
+TEST(Method_combine, this_empty)
 {
     List<int> list;
-    list.push_back(4);
-    list.push_back(5);
-    list.push_back(6);
+    List<int> list_a;
+    List<int> list_b({1, 2, 3});
 
-    List<int> list4();
     list = list_a.combine(list_b);
-    ASSERT_TRUE(list_res == list);
-
-
+    ASSERT_TRUE(list == list_b);
 }
+
+TEST(Method_combine, arg_empty)
+{
+    List<int> list;
+    List<int> list_b;
+    List<int> list_a({1, 2, 3});
+
+    list = list_a.combine(list_b);
+    ASSERT_TRUE(list == list_a);
+}
+
+TEST(Method_combine, both_full)
+{
+    List<int> list;
+    List<int> list_b({4, 5, 6});
+    List<int> list_a({1, 2, 3});
+
+    int a[6] = {1, 2, 3, 4, 5, 6};
+    List<int> list_res;
+    list = list_a.combine(list_b);
+    size_t i = 0;
+    for (const auto& it: list)
+    {
+        ASSERT_TRUE(it == a[i]);
+        i++;
+    }
+}
+
+TEST(Method_to_array, list_to_array)
+{
+    List<int> list({1, 2, 3});
+    int *arr = list.to_array();
+    size_t i = 0;
+
+    for (const auto& it: list)
+    {
+        ASSERT_TRUE(arr[i] == it);
+        i++;
+    }
+    delete arr;
+}
+
+TEST(Method_sort, sort_empty_list)
+{
+    List<int> list;
+    List<int> list_res;
+    list.sort(true);
+    ASSERT_TRUE(list == list_res);
+}
+
+TEST(Method_sort, is_increase)
+{
+    List<int> list({1, 4, 2, 3, 5});
+    List<int> list_res({1, 2, 3, 4, 5});
+    list.sort(true);
+    ASSERT_TRUE(list == list_res);
+}
+
+TEST(Method_sort, is_not_increase)
+{
+    List<int> list({1, 4, 2, 3, 5});
+    List<int> list_res({5, 4, 3, 2, 1});
+    list.sort(false);
+    ASSERT_TRUE(list == list_res);
+}
+
+TEST(Method_sort, list_have_dublicates)
+{
+    List<int> list({1, 2, 1, 2, 1, 2});
+    List<int> list_res({1, 1, 1, 2, 2, 2});
+    list.sort(true);
+    ASSERT_TRUE(list_res == list);
+}
+
+TEST(Method_reverse, empty_list)
+{
+    List<int> list;
+    List<int> result;
+    list.reverse();
+    ASSERT_TRUE(list == result);
+}
+
+TEST(Method_reverse, reverse_list)
+{
+    List<int> list({1, 2, 3});
+    List<int> result({3, 2, 1});
+    list.reverse();
+    ASSERT_TRUE(list == result);
+}
+
+TEST(Method_get_index, empty_list)
+{
+    List<int> list;
+    int index = list.get_index(5);
+    ASSERT_TRUE(index == -1);
+}
+
+TEST(Method_get_index, list_do_not_have_this_elem)
+{
+    List<int> list({1, 2, 3});
+    int index = list.get_index(5);
+    ASSERT_TRUE(index == -1);
+}
+
+TEST(Method_get_index, list_have_this_elem)
+{
+    List<int> list({1, 2, 3});
+    int index = list.get_index(2);
+    ASSERT_TRUE(index == 1);
+}
+
+TEST(Operator_assignment , empty_list)
+{
+    List<int> list;
+    List<int> res = list;
+    ASSERT_TRUE(list == res);
+}
+
+TEST(Operator_assignment ,  full_list)
+{
+    List<int> list({1, 2, 3});
+    List<int> res = list;
+    ASSERT_TRUE(list == res);
+}
+
+TEST(Operator_plus_two_arg, both_empty)
+{
+    List<int> list;
+    List<int> list_a;
+    List<int> list_b;
+
+    List<int> list_res;
+    list = list_a + list_b;
+    ASSERT_TRUE(list_res == list);
+}
+
+TEST(Operator_plus_two_arg, one_empty)
+{
+    List<int> list;
+    List<int> list_a;
+    List<int> list_b({1, 2, 3});
+
+    list = list_a + list_b;
+    ASSERT_TRUE(list == list_b);
+}
+
+TEST(Operator_plus_two_arg, both_full)
+{
+    List<int> list;
+    List<int> list_b({4, 5, 6});
+    List<int> list_a({1, 2, 3});
+
+    int a[6] = {1, 2, 3, 4, 5, 6};
+    List<int> list_res;
+    list = list_a + list_b;
+    size_t i = 0;
+    for (const auto& it: list)
+    {
+        ASSERT_TRUE(it == a[i]);
+        i++;
+    }
+}
+
+TEST(Operator_plus_T_elem, plus)
+{
+    List<int> list;
+    List<int> list1;
+    list1 = list + 5;
+    ASSERT_TRUE(list1.get_length() == 1 && list1.get_elem(0) == 5);
+}
+
+TEST(Operator_plus_one_arg, both_full)
+{
+    List<int> list;
+    List<int> list_b({4, 5, 6});
+    List<int> list_a({1, 2, 3});
+
+    int a[6] = {1, 2, 3, 4, 5, 6};
+    List<int> list_res;
+    list = list_a + list_b;
+    size_t i = 0;
+    for (const auto& it: list)
+    {
+        ASSERT_TRUE(it == a[i]);
+        i++;
+    }
+}
+
+TEST(Operator_plus_assignment, plus_to_empty_empty)
+{
+    List<int> list;
+    List<int> list1;
+    List<int> res;
+
+    list += list1;
+    ASSERT_TRUE(list == res);
+}
+
+TEST(Operator_plus_assignment, plus_to_full_empty)
+{
+    List<int> list({1, 2, 3});
+    List<int> list1;
+    List<int> res({1, 2, 3});
+
+    list += list1;
+    ASSERT_TRUE(list == res);
+}
+
+TEST(Operator_plus_assignment, plus_assigment)
+{
+    List<int> list({1, 2, 3});
+    List<int> list1({4, 5 ,6});
+    List<int> res({1, 2, 3, 4, 5, 6});
+
+    list += list1;
+    ASSERT_TRUE(list == res);
+}
+
+TEST(Operator_equal, empty_list)
+{
+    List<int> list;
+    List<int> list1;
+    ASSERT_TRUE(list == list1);
+}
+
+TEST(Operator_equal, equal)
+{
+    List<int> list({1, 2});
+    List<int> list1({1, 2});
+    ASSERT_TRUE(list == list1);
+}
+
+TEST(Operator_equal, not_equal)
+{
+    List<int> list({2, 2});
+    List<int> list1({1, 2});
+    ASSERT_FALSE(list == list1);
+}
+
+TEST(Operator_not_equal, empty_list)
+{
+    List<int> list;
+    List<int> list1;
+    ASSERT_FALSE(list != list1);
+}
+
+TEST(Operator_not_equal, equal)
+{
+    List<int> list({1, 2});
+    List<int> list1({1, 2});
+    ASSERT_FALSE(list != list1);
+}
+
+TEST(Operator_not_equal, not_equal)
+{
+    List<int> list({2, 2});
+    List<int> list1({1, 2});
+    ASSERT_TRUE(list != list1);
+}
+
 
 
 
