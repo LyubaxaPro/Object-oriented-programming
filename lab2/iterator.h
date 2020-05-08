@@ -1,7 +1,3 @@
-//
-// Created by lyubaxapro on 02.05.20.
-//
-
 #ifndef OOP_SECOND_ITERATOR_H
 #define OOP_SECOND_ITERATOR_H
 
@@ -20,9 +16,9 @@ private:
 public:
     Iterator(std::shared_ptr<Node> node_ptr);
 
-    Ref operator*() const;
+    Ref operator*();
 
-    Ptr operator->() const;
+    Ptr operator->();
 
     Iterator next();
 

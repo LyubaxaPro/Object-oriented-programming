@@ -1,7 +1,3 @@
-//
-// Created by lyubaxapro on 29.04.2020.
-//
-
 #ifndef OOP2_LIST_H
 #define OOP2_LIST_H
 

@@ -1,7 +1,3 @@
-//
-// Created by lyubaxapro on 01.05.20.
-//
-
 #ifndef OOP_SECOND_ERRORS_H
 #define OOP_SECOND_ERRORS_H
 

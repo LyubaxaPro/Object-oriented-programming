@@ -1,11 +1,7 @@
-//
-// Created by lyubaxapro on 02.05.20.
-//
-
 #include "list.h"
 #include "errors.h"
 #include "iterator.h"
-#include "time.h"
+#include <ctime>
 
 template<typename T>
 List<T>::List(const List<T>& lst)

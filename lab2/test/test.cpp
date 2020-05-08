@@ -1,8 +1,3 @@
-//
-// Created by lyubaxapro on 03.05.2020.
-//
-
-
 #include "gtest/gtest.h"
 #include "../list.hpp"
 #include "../iterator.hpp"

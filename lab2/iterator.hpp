@@ -1,6 +1,3 @@
-//
-// Created by lyubaxapro on 04.05.2020.
-//
 #include "iterator.h"
 #include <time.h>
 template <typename T>
