@@ -5,6 +5,7 @@
 #include "list.h"
 #include "errors.h"
 #include "iterator.h"
+#include "time.h"
 
 template<typename T>
 List<T>::List(const List<T>& lst)
@@ -20,14 +21,22 @@ List<T>::List(const List<T>& lst)
 template<typename T>
 List<T>::List(const T *arr, int size)
 {
+    time_t t_time = time(NULL);
     if (size < 0)
-        throw RangeError();
+        throw RangeError(__FILE__, typeid(*this).name(), __LINE__, ctime(&t_time));
     if (arr == nullptr)
-        throw MemError();
+        throw MemError(__FILE__, typeid(*this).name(), __LINE__, ctime(&t_time));
     for (size_t i = 0; i < size; i++)
     {
         push_back(arr[i]);
     }
+}
+
+template<typename T>
+List<T>::List(List<T>&& lst)
+{
+    head = lst.head;
+    tail = lst.tail;
 }
 
 template<typename T>
@@ -40,14 +49,11 @@ List<T>::List(const std::initializer_list<T>& lst)
 }
 
 template<typename T>
-List<T>::List(List::iterator begin, List::iterator end)
+List<T>::List(iterator begin, iterator end)
 {
-    if (!begin.is_valid())
-        throw RangeError();
-
-    for (auto& it = begin; it != end; ++it)
+    for (auto& it = begin; end != it; ++it)
     {
-        push_back(it.value());
+        push_back(it.get());
     }
 }
 
@@ -118,7 +124,8 @@ T List<T>::pop_back()
 {
     if (length == 0)
     {
-        throw EmptyError();
+        time_t t_time = time(NULL);
+        throw EmptyError(__FILE__, typeid(*this).name(), __LINE__, ctime(&t_time));
     }
     std::shared_ptr<Node> ptr = head;
     std::shared_ptr<Node> prev_ptr = head;
@@ -144,7 +151,9 @@ T List<T>::pop_front()
 {
     if (length == 0)
     {
-        throw EmptyError();
+
+        time_t t_time = time(NULL);
+        throw EmptyError(__FILE__, typeid(*this).name(), __LINE__, ctime(&t_time));
     }
     std::shared_ptr<Node> cur_ptr = head->next;
     T data = head->data;
@@ -183,14 +192,15 @@ void List<T>::push_range_front(const List<T>& lst)
 template<typename T>
 void List<T>::push_range_back(T *const arr, int size)
 {
+    time_t t_time = time(NULL);
     if (size < 0)
     {
-        throw RangeError();
+        throw RangeError(__FILE__, typeid(*this).name(), __LINE__, ctime(&t_time));
     }
 
     if (arr == nullptr)
     {
-        throw MemError();
+        throw MemError(__FILE__, typeid(*this).name(), __LINE__, ctime(&t_time));
     }
 
     for (size_t i = 0; i < size; i++)
@@ -202,61 +212,20 @@ void List<T>::push_range_back(T *const arr, int size)
 template<typename T>
 void List<T>::push_range_front(T *const arr, int size)
 {
+    time_t t_time = time(NULL);
     if (size < 0)
     {
-        throw RangeError();
+        throw RangeError(__FILE__, typeid(*this).name(), __LINE__, ctime(&t_time));
     }
 
     if (arr == nullptr)
     {
-        throw MemError();
+        throw MemError(__FILE__, typeid(*this).name(), __LINE__, ctime(&t_time));
     }
 
     for (int i = size - 1; i >= 0; i--)
     {
         push_front(arr[i]);
-    }
-}
-
-template<typename T>
-void List<T>::set_elem(int index, const T& elem)
-{
-    std::shared_ptr<Node> cur_ptr = find_elem_ptr(index);
-    cur_ptr->data = elem;
-}
-
-template<typename T>
-T& List<T>::get_elem(int index) const
-{
-    std::shared_ptr<Node> cur_ptr = find_elem_ptr(index);
-    return cur_ptr->data;
-}
-
-template<typename T>
-void List<T>::remove_elem(int index)
-{
-    if (index >= length or index < 0)
-    {
-        throw RangeError();
-    }
-
-    if (index == 0)
-    {
-        pop_front();
-    }
-
-    else if (index == length - 1)
-    {
-        pop_back();
-    }
-
-    else
-    {
-        std::shared_ptr<Node> prev_elem = find_elem_ptr(index - 1);
-        std::shared_ptr<Node> elem = prev_elem->next;
-        prev_elem-> next = elem->next;
-        elem.reset();
-        length--;
     }
 }
 
@@ -307,18 +276,15 @@ void List<T>::reverse()
 }
 
 template<typename T>
-int List<T>::get_index(const T elem)
+std::ostream& List<T>::to_string(std::ostream& os, const List<T>& lst)
 {
-    size_t count = 0;
-    for (const auto& it: *this)
+    os << "List ";
+    for (const auto& it: lst)
     {
-        if (it == elem)
-        {
-            return count;
-        }
-        count++;
+        os << it << "->";
     }
-    return -1;
+    os << std::endl;
+    return os;
 }
 
 template<typename T>
@@ -332,17 +298,20 @@ List<T>& List<T>::operator=(const List<T>& lst)
     return *this;
 }
 
+
 template<typename T>
-List<T> operator+(const List<T>& l1, const List<T>& l2)
+List<T>& List<T>::operator=(const std::initializer_list<T>& lst)
 {
-    List<T> result_list;
-    result_list.push_range_back(l1);
-    result_list.push_range_back(l2);
-    return result_list;
+    clear();
+    for (const auto& it: lst)
+    {
+        push_back(it);
+    }
+    return *this;
 }
 
 template<typename T>
-List<T> List<T>::operator+(const T& data)
+List<T> List<T>::operator+(const T& data) const
 {
     List<T> res_list;
     res_list.push_range_back(*this);
@@ -351,9 +320,18 @@ List<T> List<T>::operator+(const T& data)
 }
 
 template<typename T>
-List<T> List<T>::operator+(const List<T>& lst)
+List<T> List<T>::operator+(const List<T>& lst) const
 {
-    return combine(lst);
+    List<T> result_list;
+    for (const auto& it: *this)
+    {
+        result_list.push_back(it);
+    }
+    for (const auto& it: lst)
+    {
+        result_list.push_back(it);
+    }
+    return result_list;
 }
 
 template<typename T>
@@ -390,32 +368,36 @@ bool List<T>::operator!=(const List<T>& lst) const
 }
 
 template<typename T>
-std::ostream& operator<<(std::ostream& os, const List<T>& lst)
+void List<T>::remove(const List::iterator prev)
 {
-    os << "List ";
-    for (const auto& it: lst)
+    if (prev == end())
     {
-        os << it << "->";
+        time_t t_time = time(NULL);
+        throw RangeError(__FILE__, typeid(*this).name(), __LINE__, ctime(&t_time));
     }
-    os << std::endl;
-    return os;
+
+    std::weak_ptr<Node> curr = prev.get_node().lock()->next;
+    prev.get_node().lock()->next = curr.lock()->next;
+    curr.reset();
+    --length;
 }
 
 template<typename T>
-std::shared_ptr<typename List<T>::Node> List<T>::find_elem_ptr(int index) const
+void List<T>::insert(const List::iterator prev, const T& data)
 {
-    if (index >= length or index < 0)
+    if (prev == end())
     {
-        throw RangeError();
+        time_t t_time = time(NULL);
+        throw RangeError(__FILE__, typeid(*this).name(), __LINE__, ctime(&t_time));
     }
-
-    size_t count = 0;
-    std::shared_ptr<Node> curr_ptr = head;
-    while (count != index)
-    {
-        curr_ptr = curr_ptr->next;
-        count++;
-    }
-
-    return curr_ptr;
+    std::shared_ptr<Node> new_ptr = std::make_shared<Node>(data);
+    std::shared_ptr<Node> next = prev.get_node().lock()->next;
+    prev.get_node().lock()->next = new_ptr;
+    new_ptr->next = next;
+    ++length;
 }
+
+
+
+
+

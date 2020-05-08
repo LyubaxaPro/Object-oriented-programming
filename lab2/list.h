@@ -13,7 +13,7 @@
 #include "errors.h"
 
 template <typename T>
-class List: ListBase{
+class List: public ListBase{
 
 private:
     template <typename Ptr, typename Ref>
@@ -25,6 +25,8 @@ public:
 
     iterator begin();
     iterator end();
+    const const_iterator cbegin() const;
+    const const_iterator cend() const;
     const const_iterator begin() const;
     const const_iterator end() const;
 
@@ -33,7 +35,9 @@ public:
     // конструктор по умолчанию
     List() = default;
     // конструктор копирования
-    List(const List<T>& lst);
+    explicit List(const List<T>& lst);
+    //конструктор перемещения
+    List(List<T> &&lst);
     // список из массива
     List(const T *arr, int size);
     //явный конструктор со списком инициализации
@@ -66,6 +70,10 @@ public:
     // удалить первый элемент
     T pop_front();
 
+    void remove(const iterator prev);
+
+    void insert(const iterator prev, const T& data);
+
     // добавить список элементов в конец списка
     void push_range_back(const List<T>& lst);
 
@@ -78,15 +86,6 @@ public:
     //добавить массив элементов в начало списка
     void push_range_front(T *arr, int size);
 
-    // изменить элемент списка по индексу
-    void set_elem(int index, const T& elem);
-
-    // получить элемент списка по индексу
-    T& get_elem(int index) const;
-
-    // удалить элемент списка по индексу
-    void remove_elem(int index);
-
     // объединение списка с другим списком (метод возвращает новый список, содержащий сначала элементы текущего списка, затем, переданного в Combine)
     List<T> combine(const List<T>& lst);
 
@@ -96,20 +95,17 @@ public:
     // создать новый массив, в который записать все элементы списка. Метод возвращает массив.
     T* to_array();
 
-    // если содержится в списке элемент T, возвращает индекс элемента или -1 в случае если элемент не найден.
-    int get_index(const T elem);
-
+    std::ostream& to_string (std::ostream& os, const List<T>& lst);
 
     // перегрузка оператора присваивания
     List<T>& operator =(const List<T>& lst);
 
-    // перегрузка оператора +, работает аналогично Combine.
-    friend List<T> operator +(const List<T>& l1, const List<T>& l2);
+    List<T>& operator =(const std::initializer_list<T>& lst);
 
-        // перегрузка оператора +
-    List<T> operator +(const T& data);
+    // перегрузка оператора +
+    List<T> operator +(const T& data) const;
 
-    List<T> operator +(const List<T>& lst);
+    List<T> operator +(const List<T>& lst) const;
 
     // перегрузка оператора +=, работает аналогично Combine, значение записывается в this.
     List<T>& operator +=(const List<T>& lst);
@@ -119,8 +115,6 @@ public:
     bool operator ==(const List<T>& lst) const;
 
     bool operator != (const List<T>& lst) const;
-
-    friend std::ostream& operator <<(std::ostream& os, const List<T>& lst);
 
 protected:
     struct Node
@@ -137,9 +131,6 @@ private:
     size_t length = 0;
     std::shared_ptr<Node> head = nullptr;
     std::shared_ptr<Node> tail = nullptr;
-
-    std::shared_ptr<Node> find_elem_ptr(int index) const;
-
 };
 
 #endif //OOP2_LIST_H

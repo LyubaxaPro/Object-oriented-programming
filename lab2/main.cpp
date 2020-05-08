@@ -5,9 +5,7 @@
 
 int main()
 {
-    List<int> hh;
-    for(const auto& h: hh)
-        std::cout << "X" << h;
+    List<int> l;
+    l.pop_front();
     return 0;
-
 }

@@ -20,22 +20,26 @@ private:
 public:
     Iterator(std::shared_ptr<Node> node_ptr);
 
-    Ref operator*();
+    Ref operator*() const;
 
-    Ptr operator->();
+    Ptr operator->() const;
 
     Iterator next();
 
-    bool is_valid();
+    T get();
 
-    T value();
+    T get_next();
 
     Iterator operator++(int);
 
     Iterator& operator++();
-    bool operator==(const Iterator &right) const;
+    bool operator==(const Iterator& right) const;
 
-    bool operator!=(const Iterator &right) const;
+    bool operator!=(const Iterator& right) const;
+
+    operator bool() const;
+
+    std::weak_ptr<Node> get_node() const;
 
 };
 

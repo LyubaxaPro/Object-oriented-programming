@@ -87,12 +87,6 @@ TEST(ConstructorTest, constructor_using_iterator)
     ASSERT_TRUE(true);
 }
 
-TEST(ConstructorTest, constructor_using_iterator_with_nullptr_begin)
-{
-    List<int> list2({1, 2, 3, 4});
-    ASSERT_THROW(List<int> list1(list2.end(), list2.begin()),RangeError);
-}
-
 TEST(Method_get_lenght, zero_lenght)
 {
     List<int> List1;
@@ -135,7 +129,7 @@ TEST(Method_push_back, in_empty_list)
 {
     List<char> list;
     list.push_back('a');
-    ASSERT_TRUE(list.begin().value() == 'a' && list.get_length() == 1);
+    ASSERT_TRUE(list.begin().get() == 'a' && list.get_length() == 1);
 }
 
 TEST(Method_push_back, in_full_list)
@@ -153,7 +147,7 @@ TEST(Method_push_front, in_empty_list)
 {
     List<char> list;
     list.push_front('a');
-    ASSERT_TRUE(list.begin().value() == 'a' && list.get_length() == 1);
+    ASSERT_TRUE(list.begin().get() == 'a' && list.get_length() == 1);
 }
 
 TEST(Method_push_front, in_full_list)
@@ -201,6 +195,28 @@ TEST(Method_pop_front, from_one_elem_list)
 {
     List<int> list({1});
     ASSERT_TRUE(list.pop_front() == 1 && list.is_empty());
+}
+
+TEST(Method_remove, remove_elem)
+{
+    List<int> list({1, 2, 3, 4, 5});
+    List<int> list1({1, 2, 4, 5});
+    list.remove(++list.begin());
+    ASSERT_TRUE(list == list1);
+}
+
+TEST(Method_remove, remove_after_end)
+{
+    List<int> list({1, 2, 3, 4, 5});
+    ASSERT_THROW(list.remove(list.end()), RangeError);
+}
+
+TEST(Method_insert, insert_elem)
+{
+    List<int> list({1, 2, 3, 4, 5});
+    List<int> list1({1, 2, 6, 3, 4, 5});
+    list.insert(++list.begin(), 6);
+    ASSERT_TRUE(list == list1);
 }
 
 TEST(Method_push_range_back, push_empty_list)
@@ -325,70 +341,6 @@ TEST(Method_push_range_front, push_arr)
     }
 }
 
-TEST(Method_set_elem, index_is_negative)
-{
-    List<int> list;
-    ASSERT_THROW(list.set_elem(-4, 3), RangeError);
-}
-
-TEST(Method_set_elem, index_out_of_list)
-{
-    List<int> list;
-    ASSERT_THROW(list.set_elem(4, 3), RangeError);
-}
-
-TEST(Method_set_elem, set_elem)
-{
-    List<int> list({4, 5, 6, 7, 8});
-    list.set_elem(3, 0);
-
-    List<int> right_list({4, 5, 6, 0, 8});
-
-    ASSERT_TRUE(right_list == list);
-}
-
-TEST(Method_get_elem, index_is_negative)
-{
-    List<int> list;
-    ASSERT_THROW(list.get_elem(-4), RangeError);
-}
-
-TEST(Method_get_elem, index_out_of_list)
-{
-    List<int> list;
-    ASSERT_THROW(list.get_elem(4), RangeError);
-}
-
-TEST(Method_get_elem, get_elem)
-{
-    List<int> list({4, 5, 6, 7, 8});
-    int elem = list.get_elem(3);
-    List<int> right_list({4, 5, 6, 7, 8});
-
-    ASSERT_TRUE(right_list == list && elem == 7);
-}
-
-TEST(Method_remove_elem, index_is_negative)
-{
-    List<int> list;
-    ASSERT_THROW(list.remove_elem(-4), RangeError);
-}
-
-TEST(Method_remove_elem, index_out_of_list)
-{
-    List<int> list;
-    ASSERT_THROW(list.remove_elem(4), RangeError);
-}
-
-TEST(Method_remove_elem, remove_elem)
-{
-    List<int> list({4, 5, 6, 7, 8});
-    list.remove_elem(3);
-    List<int> right_list({4, 5, 6, 8});
-
-    ASSERT_TRUE(right_list == list );
-}
-
 TEST(Method_combine, both_empty)
 {
     List<int> list;
@@ -467,41 +419,6 @@ TEST(Method_reverse, reverse_list)
     ASSERT_TRUE(list == result);
 }
 
-TEST(Method_get_index, empty_list)
-{
-    List<int> list;
-    int index = list.get_index(5);
-    ASSERT_TRUE(index == -1);
-}
-
-TEST(Method_get_index, list_do_not_have_this_elem)
-{
-    List<int> list({1, 2, 3});
-    int index = list.get_index(5);
-    ASSERT_TRUE(index == -1);
-}
-
-TEST(Method_get_index, list_have_this_elem)
-{
-    List<int> list({1, 2, 3});
-    int index = list.get_index(2);
-    ASSERT_TRUE(index == 1);
-}
-
-TEST(Operator_assignment , empty_list)
-{
-    List<int> list;
-    List<int> res = list;
-    ASSERT_TRUE(list == res);
-}
-
-TEST(Operator_assignment ,  full_list)
-{
-    List<int> list({1, 2, 3});
-    List<int> res = list;
-    ASSERT_TRUE(list == res);
-}
-
 TEST(Operator_plus_two_arg, both_empty)
 {
     List<int> list;
@@ -545,7 +462,7 @@ TEST(Operator_plus_T_elem, plus)
     List<int> list;
     List<int> list1;
     list1 = list + 5;
-    ASSERT_TRUE(list1.get_length() == 1 && list1.get_elem(0) == 5);
+    ASSERT_TRUE(list1.get_length() == 1 && list1.pop_front() == 5);
 }
 
 TEST(Operator_plus_one_arg, both_full)
